@@ -17,3 +17,6 @@ Indicators/bin/
 # Windows
 Thumbs.db
 desktop.ini
+
+# Visual Studio cache
+.vs/
