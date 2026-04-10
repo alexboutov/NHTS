@@ -1,0 +1,19 @@
+# Python cache
+Analysis/__pycache__/
+Analysis/*.pyc
+Analysis/dist/
+Analysis/build/
+Analysis/*.spec
+
+# NT8 compiled output
+Strategies/bin/
+Indicators/bin/
+
+# Log and report output files
+*.jsonl
+*.txt
+*.html
+
+# Windows
+Thumbs.db
+desktop.ini
