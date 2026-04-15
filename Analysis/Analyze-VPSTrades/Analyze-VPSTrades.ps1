@@ -1,0 +1,469 @@
+﻿<#
+.SYNOPSIS
+    Analyze-VPSTrades.ps1
+    Analyzes NinjaTrader 8 trading logs directly on the VPS.
+
+.DESCRIPTION
+    - Scans ALL log files in the NT8 log directory (any date in filename)
+    - Extracts today's trading data from all files (handles cross-day strategy sessions)
+    - Creates dated analysis folder under ActiveNikiAnalysis\YYYY-MM-DD\
+    - Generates trades_final.txt, signals.txt
+    - Copies ActiveNikiMonitor, ActiveNikiTrader, and IndicatorValues files
+    - Runs Python analysis to produce {Mon}{DD}_Trading_Analysis.txt
+    - Designed to run unattended via scheduled task (SYSTEM account)
+
+    Processing order (smallest files first for performance):
+      1. log.*.txt           â†’ extract today's filled trades
+      2. ActiveNikiMonitor_* â†’ copy for signal parsing
+      3. ActiveNikiTrader_*  â†’ copy for order/close parsing
+      4. IndicatorValues_*   â†’ copy for BAR analysis (largest)
+
+.PARAMETER Date
+    The trading date to analyze. Defaults to today. Format: yyyy-MM-dd
+
+.EXAMPLE
+    .\Analyze-VPSTrades.ps1
+    # Analyzes today's logs
+
+.EXAMPLE
+    .\Analyze-VPSTrades.ps1 -Date "2026-02-07"
+    # Analyzes logs for a specific date
+#>
+
+param(
+    [string]$Date = (Get-Date -Format "yyyy-MM-dd")
+)
+
+# === CONFIGURATION ===
+
+# Auto-detect NT8 log path - check OneDrive first
+if ($env:USERNAME -eq "Administrator") {
+    $NT8LogPath = "C:\Users\Administrator\Documents\NinjaTrader 8\log"
+} elseif (Test-Path "$env:USERPROFILE\OneDrive\Documents\NinjaTrader 8\log") {
+    $NT8LogPath = "$env:USERPROFILE\OneDrive\Documents\NinjaTrader 8\log"
+    Write-Host "[CONFIG] Using OneDrive Documents" -ForegroundColor Cyan
+} else {
+    $NT8LogPath = "$env:USERPROFILE\Documents\NinjaTrader 8\log"
+    Write-Host "[CONFIG] Using standard Documents" -ForegroundColor Cyan
+}
+
+$AnalysisBasePath = Join-Path $NT8LogPath "ActiveNikiAnalysis"
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$PythonScript = Join-Path $ScriptDir "main.py"
+
+# Auto-detect Python location (check PATH first, then common install locations)
+$PythonExe = if (Get-Command python -ErrorAction SilentlyContinue) {
+    (Get-Command python).Source
+} elseif (Test-Path "C:\Program Files\Python313\python.exe") {
+    "C:\Program Files\Python313\python.exe"
+} elseif (Test-Path "$env:USERPROFILE\AppData\Local\Programs\Python\Python313\python.exe") {
+    "$env:USERPROFILE\AppData\Local\Programs\Python\Python313\python.exe"
+} elseif (Test-Path "C:\Program Files\Python312\python.exe") {
+    "C:\Program Files\Python312\python.exe"
+} elseif (Test-Path "$env:USERPROFILE\AppData\Local\Programs\Python\Python312\python.exe") {
+    "$env:USERPROFILE\AppData\Local\Programs\Python\Python312\python.exe"
+} else {
+    $null
+}
+
+$RunLog = Join-Path $AnalysisBasePath "run.log"
+
+# === FUNCTIONS ===
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $entry = "[$timestamp] [$Level] $Message"
+    # Write to both console (for manual runs) and log file
+    switch ($Level) {
+        "ERROR" { Write-Host $entry -ForegroundColor Red }
+        "WARN"  { Write-Host $entry -ForegroundColor Yellow }
+        "OK"    { Write-Host $entry -ForegroundColor Green }
+        default { Write-Host $entry }
+    }
+    Add-Content -Path $RunLog -Value $entry -ErrorAction SilentlyContinue
+}
+
+# === MAIN SCRIPT ===
+
+# Ensure base analysis directory exists
+if (!(Test-Path $AnalysisBasePath)) {
+    New-Item -ItemType Directory -Path $AnalysisBasePath -Force | Out-Null
+}
+
+Write-Log "========================================"
+Write-Log "  VPS Trading Log Analysis"
+Write-Log "  Date: $Date"
+Write-Log "========================================"
+
+# Create dated analysis folder
+$analysisFolder = Join-Path $AnalysisBasePath $Date
+if (!(Test-Path $analysisFolder)) {
+    New-Item -ItemType Directory -Path $analysisFolder -Force | Out-Null
+    Write-Log "Created folder: $analysisFolder" "OK"
+} else {
+    Write-Log "Folder exists: $analysisFolder (will overwrite)"
+}
+
+# Convert date for NT8 log filename matching (yyyy-MM-dd -> yyyyMMdd)
+$nt8DateFormat = $Date -replace "-", ""
+
+try {
+    # ==================== STEP 1: EXTRACT TRADES FROM log.*.txt ====================
+    Write-Log "Step 1: Scanning log.*.txt files for today's filled trades..."
+
+    $logFiles = Get-ChildItem -Path $NT8LogPath -Filter "log.*.txt" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -notlike "*.en.txt" }
+
+    Write-Log "  Found $($logFiles.Count) NT8 log file(s) to scan"
+
+    $allTrades = @()
+    foreach ($logFile in $logFiles) {
+        $lines = Get-Content $logFile.FullName -ErrorAction SilentlyContinue
+        $todayTrades = $lines | Where-Object {
+            $_ -match "New state='Filled'" -and $_ -match "^$Date"
+        }
+        if ($todayTrades) {
+            $allTrades += $todayTrades
+            Write-Log "  $($logFile.Name): $($todayTrades.Count) filled trade(s) for $Date"
+        }
+    }
+
+    $tradesFile = Join-Path $analysisFolder "trades_final.txt"
+    if ($allTrades.Count -gt 0) {
+        $allTrades | Out-File -FilePath $tradesFile -Encoding UTF8
+        Write-Log "  trades_final.txt: $($allTrades.Count) trades" "OK"
+    } else {
+        Write-Log "  No filled trades found for $Date" "WARN"
+        "" | Out-File -FilePath $tradesFile -Encoding UTF8
+    }
+
+    # ==================== STEP 2: EXTRACT SIGNALS FROM log.*.txt ====================
+    Write-Log "Step 2: Extracting signals from log.*.txt for today..."
+
+    # Also build signals.txt from NT8 logs (grep SIGNAL|flip lines with today's date)
+    $allSignalLines = @()
+    foreach ($logFile in $logFiles) {
+        $lines = Get-Content $logFile.FullName -ErrorAction SilentlyContinue
+        $todaySignals = $lines | Where-Object {
+            ($_ -match "SIGNAL|flip") -and $_ -match "^$Date"
+        }
+        if ($todaySignals) {
+            $allSignalLines += $todaySignals
+        }
+    }
+
+    $signalsFile = Join-Path $analysisFolder "signals.txt"
+    if ($allSignalLines.Count -gt 0) {
+        $allSignalLines | Out-File -FilePath $signalsFile -Encoding UTF8
+        Write-Log "  signals.txt: $($allSignalLines.Count) lines" "OK"
+    } else {
+        Write-Log "  No signal lines found in NT8 logs for $Date" "WARN"
+        "" | Out-File -FilePath $signalsFile -Encoding UTF8
+    }
+
+    # ==================== STEP 3: COPY ActiveNikiMonitor FILES ====================
+    Write-Log "Step 3: Copying ActiveNikiMonitor log files..."
+
+    $monitorFiles = Get-ChildItem -Path $NT8LogPath -Filter "ActiveNikiMonitor_*.txt" -ErrorAction SilentlyContinue
+    $monitorCopied = 0
+
+    foreach ($file in $monitorFiles) {
+        # Check if file contains any lines with today's date
+        $hasToday = Select-String -Path $file.FullName -Pattern $Date -Quiet -ErrorAction SilentlyContinue
+        if ($hasToday) {
+            Copy-Item -Path $file.FullName -Destination (Join-Path $analysisFolder $file.Name) -Force
+            Write-Log "  Copied (has today's data): $($file.Name)"
+            $monitorCopied++
+        }
+    }
+    Write-Log "  $monitorCopied of $($monitorFiles.Count) Monitor file(s) had data for $Date" "OK"
+
+    # ==================== STEP 4: COPY ActiveNikiTrader FILES ====================
+    Write-Log "Step 4: Copying ActiveNikiTrader log files..."
+
+    $traderFiles = Get-ChildItem -Path $NT8LogPath -Filter "ActiveNikiTrader_*.txt" -ErrorAction SilentlyContinue
+    $traderCopied = 0
+
+    foreach ($file in $traderFiles) {
+        $hasToday = Select-String -Path $file.FullName -Pattern $Date -Quiet -ErrorAction SilentlyContinue
+        if ($hasToday) {
+            Copy-Item -Path $file.FullName -Destination (Join-Path $analysisFolder $file.Name) -Force
+            Write-Log "  Copied (has today's data): $($file.Name)"
+            $traderCopied++
+        }
+    }
+    Write-Log "  $traderCopied of $($traderFiles.Count) Trader file(s) had data for $Date" "OK"
+
+    # ==================== STEP 5: COPY IndicatorValues FILES ====================
+# ==================== STEP 5: COPY IndicatorValues FILES ====================
+    Write-Log "Step 5: Copying IndicatorValues CSV files..."
+    $csvFiles = Get-ChildItem -Path $NT8LogPath -Filter "IndicatorValues_*.csv" -ErrorAction SilentlyContinue
+    $csvCopied = 0
+    foreach ($file in $csvFiles) {
+        $shouldCopy = $false
+
+        # Primary: match session-start date in filename (e.g. IndicatorValues_2026-03-28_*.csv)
+        # This handles Market Replay sessions where bar timestamps are historical dates
+        if ($file.Name -match [regex]::Escape($Date)) {
+            $shouldCopy = $true
+            $copyReason = "filename match"
+        }
+
+        # Fallback: check if any row contains today's date in BarTime content
+        # Handles live sessions where filename date may differ from content date
+        if (!$shouldCopy) {
+            $hasToday = Select-String -Path $file.FullName -Pattern $Date -Quiet -ErrorAction SilentlyContinue
+            if (!$hasToday) {
+                $dt = [datetime]::ParseExact($Date, "yyyy-MM-dd", $null)
+                $altDatePattern = "$($dt.Month)/$($dt.Day)/$($dt.Year)"
+                $hasToday = Select-String -Path $file.FullName -Pattern ([regex]::Escape($altDatePattern)) -Quiet -ErrorAction SilentlyContinue
+            }
+            if ($hasToday) {
+                $shouldCopy = $true
+                $copyReason = "content match"
+            }
+        }
+
+        if ($shouldCopy) {
+            Copy-Item -Path $file.FullName -Destination (Join-Path $analysisFolder $file.Name) -Force
+            $fileSize = [math]::Round($file.Length / 1KB, 1)
+            Write-Log "  Copied ($copyReason): $($file.Name) (${fileSize} KB)"
+            $csvCopied++
+        }
+    }
+    Write-Log "  $csvCopied of $($csvFiles.Count) CSV file(s) had data for $Date" "OK"
+    # ==================== STEP 6: RUN PYTHON ANALYSIS ====================
+    # ==================== STEP 6: RUN PYTHON ANALYSIS ====================
+    Write-Log "Step 6: Running Python analysis..."
+
+    if ((Test-Path $PythonScript) -and (Test-Path $PythonExe)) {
+        $hasData = ($allTrades.Count -gt 0) -or ($traderCopied -gt 0)
+        if ($hasData) {
+            Write-Log "  $PythonExe $PythonScript $analysisFolder --date $Date"
+            $pythonOutput = & $PythonExe $PythonScript $analysisFolder --date $Date 2>&1
+            $pythonOutput | ForEach-Object { Write-Log "  [PY] $_" }
+
+            if ($LASTEXITCODE -eq 0) {
+                # Find generated analysis file
+                $analysisFiles = Get-ChildItem -Path $analysisFolder -Filter "*_Trading_Analysis.txt" -ErrorAction SilentlyContinue
+                foreach ($af in $analysisFiles) {
+                    $afSize = [math]::Round($af.Length / 1KB, 1)
+                    Write-Log "  Report: $($af.Name) (${afSize} KB)" "OK"
+                }
+
+                # Clean up copied source files (report is self-contained)
+                $patterns = @("ActiveNikiMonitor_*.txt", "ActiveNikiTrader_*.txt", "IndicatorValues_*.csv")
+                $removed = 0
+                foreach ($pattern in $patterns) {
+                    Get-ChildItem -Path $analysisFolder -Filter $pattern -ErrorAction SilentlyContinue | ForEach-Object {
+                        Remove-Item $_.FullName -Force
+                        $removed++
+                    }
+                }
+                if ($removed -gt 0) {
+                    Write-Log "  Cleaned up $removed copied source file(s)" "OK"
+                }
+            } else {
+                Write-Log "  Python analysis exited with code $LASTEXITCODE" "ERROR"
+            }
+        } else {
+            Write-Log "  Skipping analysis - no trades or trader logs found for $Date" "WARN"
+        }
+    } else {
+        Write-Log "  main.py not found at: $PythonScript" "ERROR"
+        Write-Log "  Or python not found at: $PythonExe" "ERROR"
+    }
+
+    # ==================== SUMMARY ====================
+    Write-Log "========================================"
+    Write-Log "  Analysis complete for $Date"
+    Write-Log "  Output: $analysisFolder"
+    Write-Log "========================================"
+
+    # List all files in analysis folder
+    Get-ChildItem $analysisFolder | ForEach-Object {
+        $size = if ($_.Length -gt 1024) { "$([math]::Round($_.Length/1KB, 1)) KB" } else { "$($_.Length) bytes" }
+        Write-Log "  - $($_.Name) ($size)"
+    }
+
+# Auto-detect repo path based on environment
+if ($env:USERNAME -eq "Administrator") {
+    # VPS location
+    $repoRoot = "C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using VPS repo path" -ForegroundColor Cyan
+} elseif (Test-Path "$env:USERPROFILE\Downloads\ActiveNiki\code") {
+    # Local laptop location
+    $repoRoot = "$env:USERPROFILE\Downloads\ActiveNiki\code"
+    Write-Host "[CONFIG] Using laptop repo path (Downloads)" -ForegroundColor Cyan
+} elseif (Test-Path "$env:USERPROFILE\OneDrive\Documents\TradingRepo\NinjaTrader4Niki") {
+    # OneDrive Documents location
+    $repoRoot = "$env:USERPROFILE\OneDrive\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using OneDrive repo path" -ForegroundColor Cyan
+} else {
+    # Standard Documents location
+    $repoRoot = "$env:USERPROFILE\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using standard Documents repo path" -ForegroundColor Cyan
+}
+    $reportsDir = Join-Path $repoRoot "reports"
+
+
+    # ==================== STEP 7: PUSH REPORT TO GITHUB ====================
+    Write-Log "Step 7: GitHub is commented out ..."
+    Write-Log "Step 8: Clean up old logs is commented out ..."
+<#
+    $gitExe = "C:\Program Files\Git\cmd\git.exe"
+# Auto-detect repo path based on environment
+if ($env:USERNAME -eq "Administrator") {
+    # VPS location
+    $repoRoot = "C:\Users\Administrator\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using VPS repo path" -ForegroundColor Cyan
+} elseif (Test-Path "$env:USERPROFILE\Downloads\ActiveNiki\code") {
+    # Local laptop location
+    $repoRoot = "$env:USERPROFILE\Downloads\ActiveNiki\code"
+    Write-Host "[CONFIG] Using laptop repo path (Downloads)" -ForegroundColor Cyan
+} elseif (Test-Path "$env:USERPROFILE\OneDrive\Documents\TradingRepo\NinjaTrader4Niki") {
+    # OneDrive Documents location
+    $repoRoot = "$env:USERPROFILE\OneDrive\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using OneDrive repo path" -ForegroundColor Cyan
+} else {
+    # Standard Documents location
+    $repoRoot = "$env:USERPROFILE\Documents\TradingRepo\NinjaTrader4Niki"
+    Write-Host "[CONFIG] Using standard Documents repo path" -ForegroundColor Cyan
+}
+    $reportsDir = Join-Path $repoRoot "reports"
+
+    $reportFile = Get-ChildItem -Path $analysisFolder -Filter "*_Trading_Analysis.txt" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($reportFile) {
+        # Ensure reports directory exists
+        if (!(Test-Path $reportsDir)) {
+            New-Item -ItemType Directory -Path $reportsDir -Force | Out-Null
+            Write-Log "  Created reports directory: $reportsDir" "OK"
+        }
+        # Resolve VPS name from public IP address
+        $publicIP = (Invoke-RestMethod -Uri "https://api.ipify.org" -ErrorAction SilentlyContinue).Trim()
+        $vpsName = switch ($publicIP) {
+            "104.237.203.83" { "VPS1" }
+            "205.234.153.21" { "VPS2" }
+            "64.44.56.21"    { "VPS3" }
+            default          { "VPS_$publicIP" }
+        }
+        Write-Log "  VPS identity: $vpsName (IP: $publicIP)"
+        Copy-Item $reportFile.FullName (Join-Path $reportsDir "Trading_Analysis-${vpsName}.txt") -Force
+        $tradesFile = Join-Path $analysisFolder "trades_final.txt"
+        $signalsFile = Join-Path $analysisFolder "signals.txt"
+        if (Test-Path $tradesFile) { Copy-Item $tradesFile (Join-Path $reportsDir "trades_final.txt") -Force }
+        if (Test-Path $signalsFile) { Copy-Item $signalsFile (Join-Path $reportsDir "signals.txt") -Force }
+
+        Push-Location $repoRoot
+        try {
+            & $gitExe pull --rebase 2>&1 | Out-Null
+            & $gitExe add reports/ 2>&1 | Out-Null
+            & $gitExe commit -m $Date 2>&1 | Out-Null
+            & $gitExe push 2>&1 | Out-Null
+            Write-Log "  Git push completed for $Date - Trading_Analysis-${vpsName}.txt" "OK"
+        } catch {
+            Write-Log "  Git push failed: $_" "ERROR"
+        } finally {
+            Pop-Location
+        }
+    } else {
+        Write-Log "  No analysis report found to push" "WARN"
+    }
+    # ==================== STEP 8: CLEAN UP OLD LOG FILES ====================
+    Write-Log "Step 8: Cleaning up NT8 log files older than 3 weeks..."
+    $cutoffDate = (Get-Date).AddDays(-21)
+    $cleanupPatterns = @("ActiveNikiTrader_*.txt", "IndicatorValues_*.csv")
+    $totalRemoved = 0
+
+    foreach ($pattern in $cleanupPatterns) {
+        $oldFiles = Get-ChildItem -Path $NT8LogPath -Filter $pattern -ErrorAction SilentlyContinue |
+            Where-Object { $_.LastWriteTime -lt $cutoffDate }
+        foreach ($file in $oldFiles) {
+            Remove-Item $file.FullName -Force -ErrorAction SilentlyContinue
+            Write-Log "  Deleted: $($file.Name) (last modified $($file.LastWriteTime.ToString('yyyy-MM-dd')))"
+            $totalRemoved++
+        }
+    }
+
+    if ($totalRemoved -gt 0) {
+        Write-Log "  Removed $totalRemoved old file(s)" "OK"
+    } else {
+        Write-Log "  No files older than 3 weeks found" "INFO"
+    }
+#>
+
+# ==================== STEP 9: SEND EMAIL REPORT ====================
+Write-Log "Step 9: Sending email report..."
+
+$EmailTo      = "alex.boutov@gmail.com"
+# $EmailTo      = @("alex.boutov@gmail.com", "615thstreetdev@gmail.com")
+$EmailFrom    = "alex.boutov@gmail.com"
+$EmailAppPass = "oqmy bqia arud hfmf"
+
+# Get VPS identity from public IP
+$publicIP = (Invoke-RestMethod -Uri "https://api.ipify.org" -ErrorAction SilentlyContinue).Trim()
+$vpsName = switch ($publicIP) {
+    "104.237.203.83" { "VPS1" }
+    "205.234.153.21" { "VPS2" }
+    "64.44.56.21"    { "VPS3" }
+    default          { "VPS_$publicIP" }
+}
+Write-Log "  VPS identity: $vpsName (IP: $publicIP)"
+
+# Find the generated analysis report in the analysis folder
+$reportFile = Get-ChildItem -Path $analysisFolder -Filter "*_Trading_Analysis.txt" -ErrorAction SilentlyContinue | Select-Object -First 1
+
+if ($reportFile) {
+    # Ensure reports directory exists
+    if (!(Test-Path $reportsDir)) {
+        New-Item -ItemType Directory -Path $reportsDir -Force | Out-Null
+        Write-Log "  Created reports directory: $reportsDir" "OK"
+    }
+    
+    # Copy report to reports directory with VPS naming convention
+    $emailAttachment = Join-Path $reportsDir "Trading_Analysis-${vpsName}.txt"
+    Copy-Item $reportFile.FullName $emailAttachment -Force
+    Write-Log "  Copied report to: $emailAttachment" "OK"
+    
+    # Also copy trades_final.txt and signals.txt for reference
+    $tradesFile = Join-Path $analysisFolder "trades_final.txt"
+    $signalsFile = Join-Path $analysisFolder "signals.txt"
+    if (Test-Path $tradesFile) { Copy-Item $tradesFile (Join-Path $reportsDir "trades_final.txt") -Force }
+    if (Test-Path $signalsFile) { Copy-Item $signalsFile (Join-Path $reportsDir "signals.txt") -Force }
+    
+    try {
+        $smtpCred = New-Object System.Management.Automation.PSCredential(
+            $EmailFrom,
+            (ConvertTo-SecureString $EmailAppPass -AsPlainText -Force)
+        )
+        $tradeCount  = if ($allTrades.Count -gt 0) { $allTrades.Count } else { 0 }
+        $signalCount = if ($allSignalLines.Count -gt 0) { $allSignalLines.Count } else { 0 }
+        $emailBody = "Trading Analysis Report - ${vpsName} - ${Date}`nTrades filled : ${tradeCount}`nSignal lines  : ${signalCount}`nFull report is attached.`n---`nGenerated automatically by Analyze-VPSTrades.ps1 on ${vpsName}"
+        $mailParams = @{
+            From        = $EmailFrom
+            To          = $EmailTo
+            Subject     = "[${vpsName}] Trading Analysis - ${Date}"
+            Body        = $emailBody
+            Attachments = $emailAttachment
+            SmtpServer  = "smtp.gmail.com"
+            Port        = 587
+            UseSsl      = $true
+            Credential  = $smtpCred
+        }
+        Send-MailMessage @mailParams
+        Write-Log "  Email sent to $EmailTo - Trading_Analysis-${vpsName}.txt" "OK"
+    } catch {
+        Write-Log "  Email send failed: $_" "ERROR"
+    }
+} else {
+    Write-Log "  No analysis report found to attach" "WARN"
+    Write-Log "  Expected to find: *_Trading_Analysis.txt in $analysisFolder" "WARN"
+}
+
+
+} catch {
+    Write-Log "FATAL: $($_.Exception.Message)" "ERROR"
+    Write-Log "Stack: $($_.ScriptStackTrace)" "ERROR"
+    exit 1
+}
