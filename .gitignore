@@ -4,6 +4,13 @@ Analysis/*.pyc
 Analysis/dist/
 Analysis/build/
 Analysis/*.spec
+Analysis/Analyze-VPSTrades/__pycache__
+Analysis/Analyze-VPSTrades/__pycache__/analysis.cpython-313.pyc
+Analysis/Analyze-VPSTrades/__pycache__/config.cpython-313.pyc
+Analysis/Analyze-VPSTrades/__pycache__/parsers.cpython-313.pyc
+Analysis/Analyze-VPSTrades/__pycache__/report.cpython-313.pyc
+Analysis/Analyze-VPSTrades/__pycache__/roundtrips.cpython-313.pyc
+Analysis/Analyze-VPSTrades/__pycache__/simulation.cpython-313.pyc
 
 # NT8 compiled output
 Strategies/bin/
@@ -20,3 +27,6 @@ desktop.ini
 
 # Visual Studio cache
 .vs/
+
+# Slippage Histograms
+*.png
