@@ -30,3 +30,14 @@ desktop.ini
 
 # Slippage Histograms
 *.png
+
+# Visual Studio / build artifacts
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+*.pdb
+*.csproj.user
+dir
