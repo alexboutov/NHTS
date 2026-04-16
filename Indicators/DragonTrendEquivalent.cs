@@ -319,59 +319,9 @@ namespace NinjaTrader.NinjaScript.Indicators
 }
 
 
-#region NinjaScript generated code. Neither change nor remove.
 
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private DragonTrendEquivalent[] cacheDragonTrendEquivalent;
-		public DragonTrendEquivalent DragonTrendEquivalent(int period, bool smoothingEnabled, DragonTrendMAType smoothingMethod, int smoothingPeriod, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return DragonTrendEquivalent(Input, period, smoothingEnabled, smoothingMethod, smoothingPeriod, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public DragonTrendEquivalent DragonTrendEquivalent(ISeries<double> input, int period, bool smoothingEnabled, DragonTrendMAType smoothingMethod, int smoothingPeriod, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			if (cacheDragonTrendEquivalent != null)
-				for (int idx = 0; idx < cacheDragonTrendEquivalent.Length; idx++)
-					if (cacheDragonTrendEquivalent[idx] != null && cacheDragonTrendEquivalent[idx].Period == period && cacheDragonTrendEquivalent[idx].SmoothingEnabled == smoothingEnabled && cacheDragonTrendEquivalent[idx].SmoothingMethod == smoothingMethod && cacheDragonTrendEquivalent[idx].SmoothingPeriod == smoothingPeriod && cacheDragonTrendEquivalent[idx].ShowMarkers == showMarkers && cacheDragonTrendEquivalent[idx].UptrendMarker == uptrendMarker && cacheDragonTrendEquivalent[idx].DowntrendMarker == downtrendMarker && cacheDragonTrendEquivalent[idx].MarkerOffset == markerOffset && cacheDragonTrendEquivalent[idx].EqualsInput(input))
-						return cacheDragonTrendEquivalent[idx];
-			return CacheIndicator<DragonTrendEquivalent>(new DragonTrendEquivalent(){ Period = period, SmoothingEnabled = smoothingEnabled, SmoothingMethod = smoothingMethod, SmoothingPeriod = smoothingPeriod, ShowMarkers = showMarkers, UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker, MarkerOffset = markerOffset }, input, ref cacheDragonTrendEquivalent);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
-{
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.DragonTrendEquivalent DragonTrendEquivalent(int period, bool smoothingEnabled, DragonTrendMAType smoothingMethod, int smoothingPeriod, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.DragonTrendEquivalent(Input, period, smoothingEnabled, smoothingMethod, smoothingPeriod, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.DragonTrendEquivalent DragonTrendEquivalent(ISeries<double> input , int period, bool smoothingEnabled, DragonTrendMAType smoothingMethod, int smoothingPeriod, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.DragonTrendEquivalent(input, period, smoothingEnabled, smoothingMethod, smoothingPeriod, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.DragonTrendEquivalent DragonTrendEquivalent(int period, bool smoothingEnabled, DragonTrendMAType smoothingMethod, int smoothingPeriod, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.DragonTrendEquivalent(Input, period, smoothingEnabled, smoothingMethod, smoothingPeriod, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.DragonTrendEquivalent DragonTrendEquivalent(ISeries<double> input , int period, bool smoothingEnabled, DragonTrendMAType smoothingMethod, int smoothingPeriod, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.DragonTrendEquivalent(input, period, smoothingEnabled, smoothingMethod, smoothingPeriod, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
-
-#endregion

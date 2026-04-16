@@ -26,12 +26,12 @@ namespace NinjaTrader.NinjaScript.Indicators
         private Series<double> slowMA;
         
         // For smoothing
-        private EMA fastSmoother;
-        private EMA midSmoother;
-        private EMA slowSmoother;
+        private dynamic fastSmoother;
+        private dynamic midSmoother;
+        private dynamic slowSmoother;
         
         // For minimum spread filter
-        private ATR atrIndicator;
+        private dynamic atrIndicator;
         
         // State tracking
         private bool isUptrend;
@@ -266,59 +266,3 @@ namespace NinjaTrader.NinjaScript.Indicators
     }
 }
 
-#region NinjaScript generated code. Neither change nor remove.
-
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private AAATrendSyncEquivalent[] cacheAAATrendSyncEquivalent;
-		public AAATrendSyncEquivalent AAATrendSyncEquivalent(int fastPeriod, bool fastSmoothingEnabled, int fastSmoothingPeriod, int midPeriod, bool midSmoothingEnabled, int midSmoothingPeriod, int slowPeriod, bool slowSmoothingEnabled, int slowSmoothingPeriod, bool minSpreadEnabled, double minSpreadATRMultiplier, int minSpreadATRPeriod, bool showMarkers, int markerOffset, string uptrendMarker, string downtrendMarker)
-		{
-			return AAATrendSyncEquivalent(Input, fastPeriod, fastSmoothingEnabled, fastSmoothingPeriod, midPeriod, midSmoothingEnabled, midSmoothingPeriod, slowPeriod, slowSmoothingEnabled, slowSmoothingPeriod, minSpreadEnabled, minSpreadATRMultiplier, minSpreadATRPeriod, showMarkers, markerOffset, uptrendMarker, downtrendMarker);
-		}
-
-		public AAATrendSyncEquivalent AAATrendSyncEquivalent(ISeries<double> input, int fastPeriod, bool fastSmoothingEnabled, int fastSmoothingPeriod, int midPeriod, bool midSmoothingEnabled, int midSmoothingPeriod, int slowPeriod, bool slowSmoothingEnabled, int slowSmoothingPeriod, bool minSpreadEnabled, double minSpreadATRMultiplier, int minSpreadATRPeriod, bool showMarkers, int markerOffset, string uptrendMarker, string downtrendMarker)
-		{
-			if (cacheAAATrendSyncEquivalent != null)
-				for (int idx = 0; idx < cacheAAATrendSyncEquivalent.Length; idx++)
-					if (cacheAAATrendSyncEquivalent[idx] != null && cacheAAATrendSyncEquivalent[idx].FastPeriod == fastPeriod && cacheAAATrendSyncEquivalent[idx].FastSmoothingEnabled == fastSmoothingEnabled && cacheAAATrendSyncEquivalent[idx].FastSmoothingPeriod == fastSmoothingPeriod && cacheAAATrendSyncEquivalent[idx].MidPeriod == midPeriod && cacheAAATrendSyncEquivalent[idx].MidSmoothingEnabled == midSmoothingEnabled && cacheAAATrendSyncEquivalent[idx].MidSmoothingPeriod == midSmoothingPeriod && cacheAAATrendSyncEquivalent[idx].SlowPeriod == slowPeriod && cacheAAATrendSyncEquivalent[idx].SlowSmoothingEnabled == slowSmoothingEnabled && cacheAAATrendSyncEquivalent[idx].SlowSmoothingPeriod == slowSmoothingPeriod && cacheAAATrendSyncEquivalent[idx].MinSpreadEnabled == minSpreadEnabled && cacheAAATrendSyncEquivalent[idx].MinSpreadATRMultiplier == minSpreadATRMultiplier && cacheAAATrendSyncEquivalent[idx].MinSpreadATRPeriod == minSpreadATRPeriod && cacheAAATrendSyncEquivalent[idx].ShowMarkers == showMarkers && cacheAAATrendSyncEquivalent[idx].MarkerOffset == markerOffset && cacheAAATrendSyncEquivalent[idx].UptrendMarker == uptrendMarker && cacheAAATrendSyncEquivalent[idx].DowntrendMarker == downtrendMarker && cacheAAATrendSyncEquivalent[idx].EqualsInput(input))
-						return cacheAAATrendSyncEquivalent[idx];
-			return CacheIndicator<AAATrendSyncEquivalent>(new AAATrendSyncEquivalent(){ FastPeriod = fastPeriod, FastSmoothingEnabled = fastSmoothingEnabled, FastSmoothingPeriod = fastSmoothingPeriod, MidPeriod = midPeriod, MidSmoothingEnabled = midSmoothingEnabled, MidSmoothingPeriod = midSmoothingPeriod, SlowPeriod = slowPeriod, SlowSmoothingEnabled = slowSmoothingEnabled, SlowSmoothingPeriod = slowSmoothingPeriod, MinSpreadEnabled = minSpreadEnabled, MinSpreadATRMultiplier = minSpreadATRMultiplier, MinSpreadATRPeriod = minSpreadATRPeriod, ShowMarkers = showMarkers, MarkerOffset = markerOffset, UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker }, input, ref cacheAAATrendSyncEquivalent);
-		}
-	}
-}
-
-namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
-{
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.AAATrendSyncEquivalent AAATrendSyncEquivalent(int fastPeriod, bool fastSmoothingEnabled, int fastSmoothingPeriod, int midPeriod, bool midSmoothingEnabled, int midSmoothingPeriod, int slowPeriod, bool slowSmoothingEnabled, int slowSmoothingPeriod, bool minSpreadEnabled, double minSpreadATRMultiplier, int minSpreadATRPeriod, bool showMarkers, int markerOffset, string uptrendMarker, string downtrendMarker)
-		{
-			return indicator.AAATrendSyncEquivalent(Input, fastPeriod, fastSmoothingEnabled, fastSmoothingPeriod, midPeriod, midSmoothingEnabled, midSmoothingPeriod, slowPeriod, slowSmoothingEnabled, slowSmoothingPeriod, minSpreadEnabled, minSpreadATRMultiplier, minSpreadATRPeriod, showMarkers, markerOffset, uptrendMarker, downtrendMarker);
-		}
-
-		public Indicators.AAATrendSyncEquivalent AAATrendSyncEquivalent(ISeries<double> input , int fastPeriod, bool fastSmoothingEnabled, int fastSmoothingPeriod, int midPeriod, bool midSmoothingEnabled, int midSmoothingPeriod, int slowPeriod, bool slowSmoothingEnabled, int slowSmoothingPeriod, bool minSpreadEnabled, double minSpreadATRMultiplier, int minSpreadATRPeriod, bool showMarkers, int markerOffset, string uptrendMarker, string downtrendMarker)
-		{
-			return indicator.AAATrendSyncEquivalent(input, fastPeriod, fastSmoothingEnabled, fastSmoothingPeriod, midPeriod, midSmoothingEnabled, midSmoothingPeriod, slowPeriod, slowSmoothingEnabled, slowSmoothingPeriod, minSpreadEnabled, minSpreadATRMultiplier, minSpreadATRPeriod, showMarkers, markerOffset, uptrendMarker, downtrendMarker);
-		}
-	}
-}
-
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.AAATrendSyncEquivalent AAATrendSyncEquivalent(int fastPeriod, bool fastSmoothingEnabled, int fastSmoothingPeriod, int midPeriod, bool midSmoothingEnabled, int midSmoothingPeriod, int slowPeriod, bool slowSmoothingEnabled, int slowSmoothingPeriod, bool minSpreadEnabled, double minSpreadATRMultiplier, int minSpreadATRPeriod, bool showMarkers, int markerOffset, string uptrendMarker, string downtrendMarker)
-		{
-			return indicator.AAATrendSyncEquivalent(Input, fastPeriod, fastSmoothingEnabled, fastSmoothingPeriod, midPeriod, midSmoothingEnabled, midSmoothingPeriod, slowPeriod, slowSmoothingEnabled, slowSmoothingPeriod, minSpreadEnabled, minSpreadATRMultiplier, minSpreadATRPeriod, showMarkers, markerOffset, uptrendMarker, downtrendMarker);
-		}
-
-		public Indicators.AAATrendSyncEquivalent AAATrendSyncEquivalent(ISeries<double> input , int fastPeriod, bool fastSmoothingEnabled, int fastSmoothingPeriod, int midPeriod, bool midSmoothingEnabled, int midSmoothingPeriod, int slowPeriod, bool slowSmoothingEnabled, int slowSmoothingPeriod, bool minSpreadEnabled, double minSpreadATRMultiplier, int minSpreadATRPeriod, bool showMarkers, int markerOffset, string uptrendMarker, string downtrendMarker)
-		{
-			return indicator.AAATrendSyncEquivalent(input, fastPeriod, fastSmoothingEnabled, fastSmoothingPeriod, midPeriod, midSmoothingEnabled, midSmoothingPeriod, slowPeriod, slowSmoothingEnabled, slowSmoothingPeriod, minSpreadEnabled, minSpreadATRMultiplier, minSpreadATRPeriod, showMarkers, markerOffset, uptrendMarker, downtrendMarker);
-		}
-	}
-}
-
-#endregion

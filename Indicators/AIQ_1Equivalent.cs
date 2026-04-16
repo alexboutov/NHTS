@@ -499,59 +499,7 @@ namespace NinjaTrader.NinjaScript.Indicators
     }
 }
 
-#region NinjaScript generated code. Neither change nor remove.
 
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private AIQ_1Equivalent[] cacheAIQ_1Equivalent;
-		public AIQ_1Equivalent AIQ_1Equivalent(int period, int phase, AIQ1EquivMAMethod method, bool useBetterFormula, double pctAbove, double pctBelow, double sPctAbove, double sPctBelow, bool showSquares, int squareSize, int squareOpacity, bool showDots, int dotSize, Brush upSquareColor, Brush downSquareColor)
-		{
-			return AIQ_1Equivalent(Input, period, phase, method, useBetterFormula, pctAbove, pctBelow, sPctAbove, sPctBelow, showSquares, squareSize, squareOpacity, showDots, dotSize, upSquareColor, downSquareColor);
-		}
 
-		public AIQ_1Equivalent AIQ_1Equivalent(ISeries<double> input, int period, int phase, AIQ1EquivMAMethod method, bool useBetterFormula, double pctAbove, double pctBelow, double sPctAbove, double sPctBelow, bool showSquares, int squareSize, int squareOpacity, bool showDots, int dotSize, Brush upSquareColor, Brush downSquareColor)
-		{
-			if (cacheAIQ_1Equivalent != null)
-				for (int idx = 0; idx < cacheAIQ_1Equivalent.Length; idx++)
-					if (cacheAIQ_1Equivalent[idx] != null && cacheAIQ_1Equivalent[idx].Period == period && cacheAIQ_1Equivalent[idx].Phase == phase && cacheAIQ_1Equivalent[idx].Method == method && cacheAIQ_1Equivalent[idx].UseBetterFormula == useBetterFormula && cacheAIQ_1Equivalent[idx].PctAbove == pctAbove && cacheAIQ_1Equivalent[idx].PctBelow == pctBelow && cacheAIQ_1Equivalent[idx].SPctAbove == sPctAbove && cacheAIQ_1Equivalent[idx].SPctBelow == sPctBelow && cacheAIQ_1Equivalent[idx].ShowSquares == showSquares && cacheAIQ_1Equivalent[idx].SquareSize == squareSize && cacheAIQ_1Equivalent[idx].SquareOpacity == squareOpacity && cacheAIQ_1Equivalent[idx].ShowDots == showDots && cacheAIQ_1Equivalent[idx].DotSize == dotSize && cacheAIQ_1Equivalent[idx].UpSquareColor == upSquareColor && cacheAIQ_1Equivalent[idx].DownSquareColor == downSquareColor && cacheAIQ_1Equivalent[idx].EqualsInput(input))
-						return cacheAIQ_1Equivalent[idx];
-			return CacheIndicator<AIQ_1Equivalent>(new AIQ_1Equivalent(){ Period = period, Phase = phase, Method = method, UseBetterFormula = useBetterFormula, PctAbove = pctAbove, PctBelow = pctBelow, SPctAbove = sPctAbove, SPctBelow = sPctBelow, ShowSquares = showSquares, SquareSize = squareSize, SquareOpacity = squareOpacity, ShowDots = showDots, DotSize = dotSize, UpSquareColor = upSquareColor, DownSquareColor = downSquareColor }, input, ref cacheAIQ_1Equivalent);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
-{
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.AIQ_1Equivalent AIQ_1Equivalent(int period, int phase, AIQ1EquivMAMethod method, bool useBetterFormula, double pctAbove, double pctBelow, double sPctAbove, double sPctBelow, bool showSquares, int squareSize, int squareOpacity, bool showDots, int dotSize, Brush upSquareColor, Brush downSquareColor)
-		{
-			return indicator.AIQ_1Equivalent(Input, period, phase, method, useBetterFormula, pctAbove, pctBelow, sPctAbove, sPctBelow, showSquares, squareSize, squareOpacity, showDots, dotSize, upSquareColor, downSquareColor);
-		}
 
-		public Indicators.AIQ_1Equivalent AIQ_1Equivalent(ISeries<double> input , int period, int phase, AIQ1EquivMAMethod method, bool useBetterFormula, double pctAbove, double pctBelow, double sPctAbove, double sPctBelow, bool showSquares, int squareSize, int squareOpacity, bool showDots, int dotSize, Brush upSquareColor, Brush downSquareColor)
-		{
-			return indicator.AIQ_1Equivalent(input, period, phase, method, useBetterFormula, pctAbove, pctBelow, sPctAbove, sPctBelow, showSquares, squareSize, squareOpacity, showDots, dotSize, upSquareColor, downSquareColor);
-		}
-	}
-}
-
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.AIQ_1Equivalent AIQ_1Equivalent(int period, int phase, AIQ1EquivMAMethod method, bool useBetterFormula, double pctAbove, double pctBelow, double sPctAbove, double sPctBelow, bool showSquares, int squareSize, int squareOpacity, bool showDots, int dotSize, Brush upSquareColor, Brush downSquareColor)
-		{
-			return indicator.AIQ_1Equivalent(Input, period, phase, method, useBetterFormula, pctAbove, pctBelow, sPctAbove, sPctBelow, showSquares, squareSize, squareOpacity, showDots, dotSize, upSquareColor, downSquareColor);
-		}
-
-		public Indicators.AIQ_1Equivalent AIQ_1Equivalent(ISeries<double> input , int period, int phase, AIQ1EquivMAMethod method, bool useBetterFormula, double pctAbove, double pctBelow, double sPctAbove, double sPctBelow, bool showSquares, int squareSize, int squareOpacity, bool showDots, int dotSize, Brush upSquareColor, Brush downSquareColor)
-		{
-			return indicator.AIQ_1Equivalent(input, period, phase, method, useBetterFormula, pctAbove, pctBelow, sPctAbove, sPctBelow, showSquares, squareSize, squareOpacity, showDots, dotSize, upSquareColor, downSquareColor);
-		}
-	}
-}
-
-#endregion

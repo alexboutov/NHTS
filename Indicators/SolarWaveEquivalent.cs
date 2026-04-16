@@ -333,59 +333,9 @@ namespace NinjaTrader.NinjaScript.Indicators
 }
 
 
-#region NinjaScript generated code. Neither change nor remove.
 
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private SolarWaveEquivalent[] cacheSolarWaveEquivalent;
-		public SolarWaveEquivalent SolarWaveEquivalent(int offsetATRPeriod, double offsetMultiplierTrend, double offsetMultiplierStop, int referencePricePeriod, int referencePriceCloseWeight, int slowdownScan, int weakWeakSplit, int pullbackSplit, bool showTrailingStop, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return SolarWaveEquivalent(Input, offsetATRPeriod, offsetMultiplierTrend, offsetMultiplierStop, referencePricePeriod, referencePriceCloseWeight, slowdownScan, weakWeakSplit, pullbackSplit, showTrailingStop, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public SolarWaveEquivalent SolarWaveEquivalent(ISeries<double> input, int offsetATRPeriod, double offsetMultiplierTrend, double offsetMultiplierStop, int referencePricePeriod, int referencePriceCloseWeight, int slowdownScan, int weakWeakSplit, int pullbackSplit, bool showTrailingStop, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			if (cacheSolarWaveEquivalent != null)
-				for (int idx = 0; idx < cacheSolarWaveEquivalent.Length; idx++)
-					if (cacheSolarWaveEquivalent[idx] != null && cacheSolarWaveEquivalent[idx].OffsetATRPeriod == offsetATRPeriod && cacheSolarWaveEquivalent[idx].OffsetMultiplierTrend == offsetMultiplierTrend && cacheSolarWaveEquivalent[idx].OffsetMultiplierStop == offsetMultiplierStop && cacheSolarWaveEquivalent[idx].ReferencePricePeriod == referencePricePeriod && cacheSolarWaveEquivalent[idx].ReferencePriceCloseWeight == referencePriceCloseWeight && cacheSolarWaveEquivalent[idx].SlowdownScan == slowdownScan && cacheSolarWaveEquivalent[idx].WeakWeakSplit == weakWeakSplit && cacheSolarWaveEquivalent[idx].PullbackSplit == pullbackSplit && cacheSolarWaveEquivalent[idx].ShowTrailingStop == showTrailingStop && cacheSolarWaveEquivalent[idx].ShowMarkers == showMarkers && cacheSolarWaveEquivalent[idx].UptrendMarker == uptrendMarker && cacheSolarWaveEquivalent[idx].DowntrendMarker == downtrendMarker && cacheSolarWaveEquivalent[idx].MarkerOffset == markerOffset && cacheSolarWaveEquivalent[idx].EqualsInput(input))
-						return cacheSolarWaveEquivalent[idx];
-			return CacheIndicator<SolarWaveEquivalent>(new SolarWaveEquivalent(){ OffsetATRPeriod = offsetATRPeriod, OffsetMultiplierTrend = offsetMultiplierTrend, OffsetMultiplierStop = offsetMultiplierStop, ReferencePricePeriod = referencePricePeriod, ReferencePriceCloseWeight = referencePriceCloseWeight, SlowdownScan = slowdownScan, WeakWeakSplit = weakWeakSplit, PullbackSplit = pullbackSplit, ShowTrailingStop = showTrailingStop, ShowMarkers = showMarkers, UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker, MarkerOffset = markerOffset }, input, ref cacheSolarWaveEquivalent);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
-{
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.SolarWaveEquivalent SolarWaveEquivalent(int offsetATRPeriod, double offsetMultiplierTrend, double offsetMultiplierStop, int referencePricePeriod, int referencePriceCloseWeight, int slowdownScan, int weakWeakSplit, int pullbackSplit, bool showTrailingStop, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.SolarWaveEquivalent(Input, offsetATRPeriod, offsetMultiplierTrend, offsetMultiplierStop, referencePricePeriod, referencePriceCloseWeight, slowdownScan, weakWeakSplit, pullbackSplit, showTrailingStop, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.SolarWaveEquivalent SolarWaveEquivalent(ISeries<double> input , int offsetATRPeriod, double offsetMultiplierTrend, double offsetMultiplierStop, int referencePricePeriod, int referencePriceCloseWeight, int slowdownScan, int weakWeakSplit, int pullbackSplit, bool showTrailingStop, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.SolarWaveEquivalent(input, offsetATRPeriod, offsetMultiplierTrend, offsetMultiplierStop, referencePricePeriod, referencePriceCloseWeight, slowdownScan, weakWeakSplit, pullbackSplit, showTrailingStop, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.SolarWaveEquivalent SolarWaveEquivalent(int offsetATRPeriod, double offsetMultiplierTrend, double offsetMultiplierStop, int referencePricePeriod, int referencePriceCloseWeight, int slowdownScan, int weakWeakSplit, int pullbackSplit, bool showTrailingStop, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.SolarWaveEquivalent(Input, offsetATRPeriod, offsetMultiplierTrend, offsetMultiplierStop, referencePricePeriod, referencePriceCloseWeight, slowdownScan, weakWeakSplit, pullbackSplit, showTrailingStop, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.SolarWaveEquivalent SolarWaveEquivalent(ISeries<double> input , int offsetATRPeriod, double offsetMultiplierTrend, double offsetMultiplierStop, int referencePricePeriod, int referencePriceCloseWeight, int slowdownScan, int weakWeakSplit, int pullbackSplit, bool showTrailingStop, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.SolarWaveEquivalent(input, offsetATRPeriod, offsetMultiplierTrend, offsetMultiplierStop, referencePricePeriod, referencePriceCloseWeight, slowdownScan, weakWeakSplit, pullbackSplit, showTrailingStop, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
-
-#endregion

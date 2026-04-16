@@ -446,59 +446,9 @@ namespace NinjaTrader.NinjaScript.Indicators
 }
 
 
-#region NinjaScript generated code. Neither change nor remove.
 
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private RubyRiverEquivalent[] cacheRubyRiverEquivalent;
-		public RubyRiverEquivalent RubyRiverEquivalent(RubyRiverMAType mAType, int mAPeriod, bool mASmoothingEnabled, RubyRiverMAType mASmoothingMethod, int mASmoothingPeriod, double offsetMultiplier, int offsetPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return RubyRiverEquivalent(Input, mAType, mAPeriod, mASmoothingEnabled, mASmoothingMethod, mASmoothingPeriod, offsetMultiplier, offsetPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public RubyRiverEquivalent RubyRiverEquivalent(ISeries<double> input, RubyRiverMAType mAType, int mAPeriod, bool mASmoothingEnabled, RubyRiverMAType mASmoothingMethod, int mASmoothingPeriod, double offsetMultiplier, int offsetPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			if (cacheRubyRiverEquivalent != null)
-				for (int idx = 0; idx < cacheRubyRiverEquivalent.Length; idx++)
-					if (cacheRubyRiverEquivalent[idx] != null && cacheRubyRiverEquivalent[idx].MAType == mAType && cacheRubyRiverEquivalent[idx].MAPeriod == mAPeriod && cacheRubyRiverEquivalent[idx].MASmoothingEnabled == mASmoothingEnabled && cacheRubyRiverEquivalent[idx].MASmoothingMethod == mASmoothingMethod && cacheRubyRiverEquivalent[idx].MASmoothingPeriod == mASmoothingPeriod && cacheRubyRiverEquivalent[idx].OffsetMultiplier == offsetMultiplier && cacheRubyRiverEquivalent[idx].OffsetPeriod == offsetPeriod && cacheRubyRiverEquivalent[idx].ShowPlot == showPlot && cacheRubyRiverEquivalent[idx].ShowMarkers == showMarkers && cacheRubyRiverEquivalent[idx].UptrendMarker == uptrendMarker && cacheRubyRiverEquivalent[idx].DowntrendMarker == downtrendMarker && cacheRubyRiverEquivalent[idx].MarkerOffset == markerOffset && cacheRubyRiverEquivalent[idx].EqualsInput(input))
-						return cacheRubyRiverEquivalent[idx];
-			return CacheIndicator<RubyRiverEquivalent>(new RubyRiverEquivalent(){ MAType = mAType, MAPeriod = mAPeriod, MASmoothingEnabled = mASmoothingEnabled, MASmoothingMethod = mASmoothingMethod, MASmoothingPeriod = mASmoothingPeriod, OffsetMultiplier = offsetMultiplier, OffsetPeriod = offsetPeriod, ShowPlot = showPlot, ShowMarkers = showMarkers, UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker, MarkerOffset = markerOffset }, input, ref cacheRubyRiverEquivalent);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
-{
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.RubyRiverEquivalent RubyRiverEquivalent(RubyRiverMAType mAType, int mAPeriod, bool mASmoothingEnabled, RubyRiverMAType mASmoothingMethod, int mASmoothingPeriod, double offsetMultiplier, int offsetPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.RubyRiverEquivalent(Input, mAType, mAPeriod, mASmoothingEnabled, mASmoothingMethod, mASmoothingPeriod, offsetMultiplier, offsetPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.RubyRiverEquivalent RubyRiverEquivalent(ISeries<double> input , RubyRiverMAType mAType, int mAPeriod, bool mASmoothingEnabled, RubyRiverMAType mASmoothingMethod, int mASmoothingPeriod, double offsetMultiplier, int offsetPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.RubyRiverEquivalent(input, mAType, mAPeriod, mASmoothingEnabled, mASmoothingMethod, mASmoothingPeriod, offsetMultiplier, offsetPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.RubyRiverEquivalent RubyRiverEquivalent(RubyRiverMAType mAType, int mAPeriod, bool mASmoothingEnabled, RubyRiverMAType mASmoothingMethod, int mASmoothingPeriod, double offsetMultiplier, int offsetPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.RubyRiverEquivalent(Input, mAType, mAPeriod, mASmoothingEnabled, mASmoothingMethod, mASmoothingPeriod, offsetMultiplier, offsetPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.RubyRiverEquivalent RubyRiverEquivalent(ISeries<double> input , RubyRiverMAType mAType, int mAPeriod, bool mASmoothingEnabled, RubyRiverMAType mASmoothingMethod, int mASmoothingPeriod, double offsetMultiplier, int offsetPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.RubyRiverEquivalent(input, mAType, mAPeriod, mASmoothingEnabled, mASmoothingMethod, mASmoothingPeriod, offsetMultiplier, offsetPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
-
-#endregion

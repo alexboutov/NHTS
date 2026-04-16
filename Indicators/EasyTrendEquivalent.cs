@@ -460,59 +460,9 @@ namespace NinjaTrader.NinjaScript.Indicators
     }
 }
 
-#region NinjaScript generated code. Neither change nor remove.
 
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private EasyTrendEquivalent[] cacheEasyTrendEquivalent;
-		public EasyTrendEquivalent EasyTrendEquivalent(EasyTrendMAType mAType, int period, bool smoothingEnabled, EasyTrendMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, bool filterAfterSmoothing, double filterMultiplier, EasyTrendFilterUnit filterUnit, int filterATRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return EasyTrendEquivalent(Input, mAType, period, smoothingEnabled, smoothingMethod, smoothingPeriod, filterEnabled, filterAfterSmoothing, filterMultiplier, filterUnit, filterATRPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public EasyTrendEquivalent EasyTrendEquivalent(ISeries<double> input, EasyTrendMAType mAType, int period, bool smoothingEnabled, EasyTrendMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, bool filterAfterSmoothing, double filterMultiplier, EasyTrendFilterUnit filterUnit, int filterATRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			if (cacheEasyTrendEquivalent != null)
-				for (int idx = 0; idx < cacheEasyTrendEquivalent.Length; idx++)
-					if (cacheEasyTrendEquivalent[idx] != null && cacheEasyTrendEquivalent[idx].MAType == mAType && cacheEasyTrendEquivalent[idx].Period == period && cacheEasyTrendEquivalent[idx].SmoothingEnabled == smoothingEnabled && cacheEasyTrendEquivalent[idx].SmoothingMethod == smoothingMethod && cacheEasyTrendEquivalent[idx].SmoothingPeriod == smoothingPeriod && cacheEasyTrendEquivalent[idx].FilterEnabled == filterEnabled && cacheEasyTrendEquivalent[idx].FilterAfterSmoothing == filterAfterSmoothing && cacheEasyTrendEquivalent[idx].FilterMultiplier == filterMultiplier && cacheEasyTrendEquivalent[idx].FilterUnit == filterUnit && cacheEasyTrendEquivalent[idx].FilterATRPeriod == filterATRPeriod && cacheEasyTrendEquivalent[idx].ShowPlot == showPlot && cacheEasyTrendEquivalent[idx].ShowMarkers == showMarkers && cacheEasyTrendEquivalent[idx].UptrendMarker == uptrendMarker && cacheEasyTrendEquivalent[idx].DowntrendMarker == downtrendMarker && cacheEasyTrendEquivalent[idx].MarkerOffset == markerOffset && cacheEasyTrendEquivalent[idx].EqualsInput(input))
-						return cacheEasyTrendEquivalent[idx];
-			return CacheIndicator<EasyTrendEquivalent>(new EasyTrendEquivalent(){ MAType = mAType, Period = period, SmoothingEnabled = smoothingEnabled, SmoothingMethod = smoothingMethod, SmoothingPeriod = smoothingPeriod, FilterEnabled = filterEnabled, FilterAfterSmoothing = filterAfterSmoothing, FilterMultiplier = filterMultiplier, FilterUnit = filterUnit, FilterATRPeriod = filterATRPeriod, ShowPlot = showPlot, ShowMarkers = showMarkers, UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker, MarkerOffset = markerOffset }, input, ref cacheEasyTrendEquivalent);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
-{
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.EasyTrendEquivalent EasyTrendEquivalent(EasyTrendMAType mAType, int period, bool smoothingEnabled, EasyTrendMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, bool filterAfterSmoothing, double filterMultiplier, EasyTrendFilterUnit filterUnit, int filterATRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.EasyTrendEquivalent(Input, mAType, period, smoothingEnabled, smoothingMethod, smoothingPeriod, filterEnabled, filterAfterSmoothing, filterMultiplier, filterUnit, filterATRPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.EasyTrendEquivalent EasyTrendEquivalent(ISeries<double> input , EasyTrendMAType mAType, int period, bool smoothingEnabled, EasyTrendMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, bool filterAfterSmoothing, double filterMultiplier, EasyTrendFilterUnit filterUnit, int filterATRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.EasyTrendEquivalent(input, mAType, period, smoothingEnabled, smoothingMethod, smoothingPeriod, filterEnabled, filterAfterSmoothing, filterMultiplier, filterUnit, filterATRPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.EasyTrendEquivalent EasyTrendEquivalent(EasyTrendMAType mAType, int period, bool smoothingEnabled, EasyTrendMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, bool filterAfterSmoothing, double filterMultiplier, EasyTrendFilterUnit filterUnit, int filterATRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.EasyTrendEquivalent(Input, mAType, period, smoothingEnabled, smoothingMethod, smoothingPeriod, filterEnabled, filterAfterSmoothing, filterMultiplier, filterUnit, filterATRPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.EasyTrendEquivalent EasyTrendEquivalent(ISeries<double> input , EasyTrendMAType mAType, int period, bool smoothingEnabled, EasyTrendMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, bool filterAfterSmoothing, double filterMultiplier, EasyTrendFilterUnit filterUnit, int filterATRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.EasyTrendEquivalent(input, mAType, period, smoothingEnabled, smoothingMethod, smoothingPeriod, filterEnabled, filterAfterSmoothing, filterMultiplier, filterUnit, filterATRPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
-
-#endregion

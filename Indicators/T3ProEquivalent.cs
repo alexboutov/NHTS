@@ -520,59 +520,9 @@ namespace NinjaTrader.NinjaScript.Indicators
     }
 }
 
-#region NinjaScript generated code. Neither change nor remove.
 
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private T3ProEquivalent[] cacheT3ProEquivalent;
-		public T3ProEquivalent T3ProEquivalent(T3ProMAType mAType, int period, int tCount, double vFactor, bool chaosSmoothingEnabled, T3ProMAType chaosSmoothingMethod, int chaosSmoothingPeriod, bool filterEnabled, double filterMultiplier, int filterATRPeriod, bool plotEnabled, bool markerEnabled, string markerStringUptrend, string markerStringDowntrend, int markerOffset)
-		{
-			return T3ProEquivalent(Input, mAType, period, tCount, vFactor, chaosSmoothingEnabled, chaosSmoothingMethod, chaosSmoothingPeriod, filterEnabled, filterMultiplier, filterATRPeriod, plotEnabled, markerEnabled, markerStringUptrend, markerStringDowntrend, markerOffset);
-		}
 
-		public T3ProEquivalent T3ProEquivalent(ISeries<double> input, T3ProMAType mAType, int period, int tCount, double vFactor, bool chaosSmoothingEnabled, T3ProMAType chaosSmoothingMethod, int chaosSmoothingPeriod, bool filterEnabled, double filterMultiplier, int filterATRPeriod, bool plotEnabled, bool markerEnabled, string markerStringUptrend, string markerStringDowntrend, int markerOffset)
-		{
-			if (cacheT3ProEquivalent != null)
-				for (int idx = 0; idx < cacheT3ProEquivalent.Length; idx++)
-					if (cacheT3ProEquivalent[idx] != null && cacheT3ProEquivalent[idx].MAType == mAType && cacheT3ProEquivalent[idx].Period == period && cacheT3ProEquivalent[idx].TCount == tCount && cacheT3ProEquivalent[idx].VFactor == vFactor && cacheT3ProEquivalent[idx].ChaosSmoothingEnabled == chaosSmoothingEnabled && cacheT3ProEquivalent[idx].ChaosSmoothingMethod == chaosSmoothingMethod && cacheT3ProEquivalent[idx].ChaosSmoothingPeriod == chaosSmoothingPeriod && cacheT3ProEquivalent[idx].FilterEnabled == filterEnabled && cacheT3ProEquivalent[idx].FilterMultiplier == filterMultiplier && cacheT3ProEquivalent[idx].FilterATRPeriod == filterATRPeriod && cacheT3ProEquivalent[idx].PlotEnabled == plotEnabled && cacheT3ProEquivalent[idx].MarkerEnabled == markerEnabled && cacheT3ProEquivalent[idx].MarkerStringUptrend == markerStringUptrend && cacheT3ProEquivalent[idx].MarkerStringDowntrend == markerStringDowntrend && cacheT3ProEquivalent[idx].MarkerOffset == markerOffset && cacheT3ProEquivalent[idx].EqualsInput(input))
-						return cacheT3ProEquivalent[idx];
-			return CacheIndicator<T3ProEquivalent>(new T3ProEquivalent(){ MAType = mAType, Period = period, TCount = tCount, VFactor = vFactor, ChaosSmoothingEnabled = chaosSmoothingEnabled, ChaosSmoothingMethod = chaosSmoothingMethod, ChaosSmoothingPeriod = chaosSmoothingPeriod, FilterEnabled = filterEnabled, FilterMultiplier = filterMultiplier, FilterATRPeriod = filterATRPeriod, PlotEnabled = plotEnabled, MarkerEnabled = markerEnabled, MarkerStringUptrend = markerStringUptrend, MarkerStringDowntrend = markerStringDowntrend, MarkerOffset = markerOffset }, input, ref cacheT3ProEquivalent);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
-{
-	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
-	{
-		public Indicators.T3ProEquivalent T3ProEquivalent(T3ProMAType mAType, int period, int tCount, double vFactor, bool chaosSmoothingEnabled, T3ProMAType chaosSmoothingMethod, int chaosSmoothingPeriod, bool filterEnabled, double filterMultiplier, int filterATRPeriod, bool plotEnabled, bool markerEnabled, string markerStringUptrend, string markerStringDowntrend, int markerOffset)
-		{
-			return indicator.T3ProEquivalent(Input, mAType, period, tCount, vFactor, chaosSmoothingEnabled, chaosSmoothingMethod, chaosSmoothingPeriod, filterEnabled, filterMultiplier, filterATRPeriod, plotEnabled, markerEnabled, markerStringUptrend, markerStringDowntrend, markerOffset);
-		}
 
-		public Indicators.T3ProEquivalent T3ProEquivalent(ISeries<double> input , T3ProMAType mAType, int period, int tCount, double vFactor, bool chaosSmoothingEnabled, T3ProMAType chaosSmoothingMethod, int chaosSmoothingPeriod, bool filterEnabled, double filterMultiplier, int filterATRPeriod, bool plotEnabled, bool markerEnabled, string markerStringUptrend, string markerStringDowntrend, int markerOffset)
-		{
-			return indicator.T3ProEquivalent(input, mAType, period, tCount, vFactor, chaosSmoothingEnabled, chaosSmoothingMethod, chaosSmoothingPeriod, filterEnabled, filterMultiplier, filterATRPeriod, plotEnabled, markerEnabled, markerStringUptrend, markerStringDowntrend, markerOffset);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.T3ProEquivalent T3ProEquivalent(T3ProMAType mAType, int period, int tCount, double vFactor, bool chaosSmoothingEnabled, T3ProMAType chaosSmoothingMethod, int chaosSmoothingPeriod, bool filterEnabled, double filterMultiplier, int filterATRPeriod, bool plotEnabled, bool markerEnabled, string markerStringUptrend, string markerStringDowntrend, int markerOffset)
-		{
-			return indicator.T3ProEquivalent(Input, mAType, period, tCount, vFactor, chaosSmoothingEnabled, chaosSmoothingMethod, chaosSmoothingPeriod, filterEnabled, filterMultiplier, filterATRPeriod, plotEnabled, markerEnabled, markerStringUptrend, markerStringDowntrend, markerOffset);
-		}
 
-		public Indicators.T3ProEquivalent T3ProEquivalent(ISeries<double> input , T3ProMAType mAType, int period, int tCount, double vFactor, bool chaosSmoothingEnabled, T3ProMAType chaosSmoothingMethod, int chaosSmoothingPeriod, bool filterEnabled, double filterMultiplier, int filterATRPeriod, bool plotEnabled, bool markerEnabled, string markerStringUptrend, string markerStringDowntrend, int markerOffset)
-		{
-			return indicator.T3ProEquivalent(input, mAType, period, tCount, vFactor, chaosSmoothingEnabled, chaosSmoothingMethod, chaosSmoothingPeriod, filterEnabled, filterMultiplier, filterATRPeriod, plotEnabled, markerEnabled, markerStringUptrend, markerStringDowntrend, markerOffset);
-		}
-	}
-}
-
-#endregion

@@ -418,43 +418,9 @@ namespace NinjaTrader.NinjaScript.Indicators
     }
 }
 
-#region NinjaScript generated code. Neither change nor remove.
 
-namespace NinjaTrader.NinjaScript.Indicators
-{
-	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
-	{
-		private VIDYAProEquivalent[] cacheVIDYAProEquivalent;
-		public VIDYAProEquivalent VIDYAProEquivalent(int period, int volatilityPeriod, bool smoothingEnabled, NinjaTrader.NinjaScript.Indicators.VIDYAProMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, double filterMultiplier, int aTRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return VIDYAProEquivalent(Input, period, volatilityPeriod, smoothingEnabled, smoothingMethod, smoothingPeriod, filterEnabled, filterMultiplier, aTRPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public VIDYAProEquivalent VIDYAProEquivalent(ISeries<double> input, int period, int volatilityPeriod, bool smoothingEnabled, NinjaTrader.NinjaScript.Indicators.VIDYAProMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, double filterMultiplier, int aTRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			if (cacheVIDYAProEquivalent != null)
-				for (int idx = 0; idx < cacheVIDYAProEquivalent.Length; idx++)
-					if (cacheVIDYAProEquivalent[idx] != null && cacheVIDYAProEquivalent[idx].Period == period && cacheVIDYAProEquivalent[idx].VolatilityPeriod == volatilityPeriod && cacheVIDYAProEquivalent[idx].SmoothingEnabled == smoothingEnabled && cacheVIDYAProEquivalent[idx].SmoothingMethod == smoothingMethod && cacheVIDYAProEquivalent[idx].SmoothingPeriod == smoothingPeriod && cacheVIDYAProEquivalent[idx].FilterEnabled == filterEnabled && cacheVIDYAProEquivalent[idx].FilterMultiplier == filterMultiplier && cacheVIDYAProEquivalent[idx].ATRPeriod == aTRPeriod && cacheVIDYAProEquivalent[idx].ShowPlot == showPlot && cacheVIDYAProEquivalent[idx].ShowMarkers == showMarkers && cacheVIDYAProEquivalent[idx].UptrendMarker == uptrendMarker && cacheVIDYAProEquivalent[idx].DowntrendMarker == downtrendMarker && cacheVIDYAProEquivalent[idx].MarkerOffset == markerOffset && cacheVIDYAProEquivalent[idx].EqualsInput(input))
-						return cacheVIDYAProEquivalent[idx];
-			return CacheIndicator<VIDYAProEquivalent>(new VIDYAProEquivalent(){ Period = period, VolatilityPeriod = volatilityPeriod, SmoothingEnabled = smoothingEnabled, SmoothingMethod = smoothingMethod, SmoothingPeriod = smoothingPeriod, FilterEnabled = filterEnabled, FilterMultiplier = filterMultiplier, ATRPeriod = aTRPeriod, ShowPlot = showPlot, ShowMarkers = showMarkers, UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker, MarkerOffset = markerOffset }, input, ref cacheVIDYAProEquivalent);
-		}
-	}
-}
 
-namespace NinjaTrader.NinjaScript.Strategies
-{
-	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
-	{
-		public Indicators.VIDYAProEquivalent VIDYAProEquivalent(int period, int volatilityPeriod, bool smoothingEnabled, NinjaTrader.NinjaScript.Indicators.VIDYAProMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, double filterMultiplier, int aTRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.VIDYAProEquivalent(Input, period, volatilityPeriod, smoothingEnabled, smoothingMethod, smoothingPeriod, filterEnabled, filterMultiplier, aTRPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
 
-		public Indicators.VIDYAProEquivalent VIDYAProEquivalent(ISeries<double> input, int period, int volatilityPeriod, bool smoothingEnabled, NinjaTrader.NinjaScript.Indicators.VIDYAProMAType smoothingMethod, int smoothingPeriod, bool filterEnabled, double filterMultiplier, int aTRPeriod, bool showPlot, bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-		{
-			return indicator.VIDYAProEquivalent(input, period, volatilityPeriod, smoothingEnabled, smoothingMethod, smoothingPeriod, filterEnabled, filterMultiplier, aTRPeriod, showPlot, showMarkers, uptrendMarker, downtrendMarker, markerOffset);
-		}
-	}
-}
 
-#endregion
+
