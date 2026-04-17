@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36811.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHTS", "NHTS.csproj", "{365109D7-1687-45ED-A2C0-24D0DF6F25F2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		Indicators\AAATrendSyncEquivalent.cs = Indicators\AAATrendSyncEquivalent.cs
+		Indicators\AIQ_1Equivalent.cs = Indicators\AIQ_1Equivalent.cs
+		Indicators\AIQ_SuperBandsEquivalent.cs = Indicators\AIQ_SuperBandsEquivalent.cs
+		Indicators\DragonTrendEquivalent.cs = Indicators\DragonTrendEquivalent.cs
+		Indicators\EasyTrendEquivalent.cs = Indicators\EasyTrendEquivalent.cs
+		Strategies\NHTS.cs = Strategies\NHTS.cs
+		Strategies\NHTS.Indicators.cs = Strategies\NHTS.Indicators.cs
+		Strategies\NHTS.Logging.cs = Strategies\NHTS.Logging.cs
+		Strategies\NHTS.Panel.cs = Strategies\NHTS.Panel.cs
+		Strategies\NHTS.Signals.cs = Strategies\NHTS.Signals.cs
+		Docs\PRD.txt = Docs\PRD.txt
+		Indicators\RubyRiverEquivalent.cs = Indicators\RubyRiverEquivalent.cs
+		Indicators\SolarWaveEquivalent.cs = Indicators\SolarWaveEquivalent.cs
+		Indicators\T3ProEquivalent.cs = Indicators\T3ProEquivalent.cs
+		Indicators\VIDYAProEquivalent.cs = Indicators\VIDYAProEquivalent.cs
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{365109D7-1687-45ED-A2C0-24D0DF6F25F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{365109D7-1687-45ED-A2C0-24D0DF6F25F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{365109D7-1687-45ED-A2C0-24D0DF6F25F2}.Debug|x64.ActiveCfg = Debug|x64
+		{365109D7-1687-45ED-A2C0-24D0DF6F25F2}.Debug|x64.Build.0 = Debug|x64
+		{365109D7-1687-45ED-A2C0-24D0DF6F25F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{365109D7-1687-45ED-A2C0-24D0DF6F25F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{365109D7-1687-45ED-A2C0-24D0DF6F25F2}.Release|x64.ActiveCfg = Release|x64
+		{365109D7-1687-45ED-A2C0-24D0DF6F25F2}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {39E83CFA-91BD-45A7-B41D-29BA7D267DCE}
+	EndGlobalSection
+EndGlobal

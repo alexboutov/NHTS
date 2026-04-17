@@ -18,6 +18,7 @@ namespace NinjaTrader.NinjaScript.Indicators
     /// AAATrendSync Equivalent - Detects when Fast, Mid, and Slow MAs are in sync
     /// Uptrend: Fast > Mid > Slow (all aligned bullish)
     /// Downtrend: Fast < Mid < Slow (all aligned bearish)
+    /// ADD Useless Comment to test git status
     /// </summary>
     public class AAATrendSyncEquivalent : Indicator
     {
