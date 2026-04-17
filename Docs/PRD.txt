@@ -1,0 +1,320 @@
+No Headache Trading Strategy
+NHTS
+Product Requirements Document
+Version 0.2  |  April 2026
+
+
+
+
+Confidential — Alex & Niki
+
+
+Table of Contents
+
+
+
+
+
+
+1. Overview
+NHTS (No Headache Trading Strategy) is a NinjaTrader 8 strategy distribution that automates multi-indicator confluence tracking for NQ, CL, and GC futures trading. NHTS reduces the emotional and cognitive load associated with choppy markets, noise, and false signals by monitoring multiple indicator conditions simultaneously and alerting the trader — or automatically executing — when a qualifying setup occurs.
+
+
+2. Purpose and Scope
+* Provide audio and visual signals to NinjaTrader 8 traders when confluence and other conditions are met.
+* Reduce emotional stress associated with choppy markets, market noise, and false signals by automating the task of tracking multiple conditions simultaneously.
+* Provide an integrated analysis engine that processes trade session logs and surfaces optimization suggestions for trading hours, confluence thresholds, indicator selection, and exit parameters.
+* Be distributable to non-technical traders with minimal setup friction.
+
+
+3. Stakeholders
+
+
+Alex
+	Developer and product owner
+	Niki (Reference Trader)
+	VPS owner, NQ, CL, and GC domain expert; owner of reference chart templates; signal validation partner for NQ/CL/GC milestones; distribution manager
+	
+
+4. Target Market
+V1 target market is Bob's trading group — a known circle of active NinjaTrader 8 traders with access managed by Niki. Traders in this group:
+* Use NinjaTrader 8 on Windows (local machines and/or VPS servers).
+* May run multiple machines simultaneously.
+* Are non-technical — installation and operation must require no programming knowledge.
+* Gain access via verbal agreement with Niki.
+
+
+Broader commercial distribution is a future-scope item, dependent on completion of the compiled .dll and licensing milestones.
+
+
+5. Use Cases
+5.1 Signal Monitoring
+NHTS is attached to an NQ, CL, or GC chart in NinjaTrader 8. It continuously evaluates the selected indicator set and displays real-time state in an on-chart panel. When the configured confluence threshold is met, NHTS:
+* Displays a directional signal (LONG / SHORT) in the panel.
+* Plays an audio alert.
+* Optionally sends an entry order to the broker automatically.
+
+
+5.2 Confluence Configuration
+The trader adjusts which indicators participate in the confluence vote directly from the panel using checkboxes, without reloading the strategy.
+
+
+5.3 Session Analysis
+After a trading session the trader clicks Run Analysis in the NHTS panel (or relies on a scheduled end-of-session task). NHTS generates an HTML report opened automatically in the default browser, covering trade performance, time slot analysis, and parameter optimization suggestions.
+
+
+5.4 Scheduled Reporting
+NHTS supports a configurable scheduled analysis task (e.g. end-of-session, daily) that runs the analysis pipeline and optionally delivers the report by email.
+
+
+6. Instruments
+
+
+NQ (E-mini Nasdaq-100)
+	V1 — primary instrument, fully validated
+	CL (Crude Oil)
+	Separate milestone — pending template capture and validation
+	GC (Gold)
+	Separate milestone — pending template capture and validation
+	
+
+NHTS strategy code is instrument-agnostic. Instrument-specific parameters (UniRenko bar size, stop/target values in ticks, trading hours, indicator thresholds) are encapsulated in per-instrument NinjaTrader Strategy and Chart templates shipped with NHTS. CL and GC templates are derived from Niki's live charts and validated via Market Replay comparison.
+
+
+7. Indicator Set
+NHTS uses proprietary *Equivalent.cs indicator implementations. These are original implementations owned by Alex — no third-party commercial indicator licenses are required by the end user. The full indicator set is:
+
+
+Indicator
+	Role
+	Mandatory
+	AIQ_1Equivalent
+	Trigger — must fire for any signal
+	Yes (non-clearable)
+	AAATrendSyncEquivalent
+	Confluence voter
+	No
+	AIQ_SuperBandsEquivalent
+	Confluence voter
+	No
+	DragonTrendEquivalent
+	Confluence voter
+	No
+	EasyTrendEquivalent
+	Confluence voter
+	No
+	RubyRiverEquivalent
+	Confluence voter
+	No
+	SolarWaveEquivalent
+	Confluence voter
+	No
+	T3ProEquivalent
+	Confluence voter
+	No
+	VIDYAProEquivalent
+	Confluence voter
+	No
+	
+
+AIQ_1Equivalent is the mandatory trigger indicator. Its checkbox is displayed in the panel but cannot be cleared. All other indicators are optional confluence voters with clearable checkboxes.
+
+
+8. On-Chart Panel
+8.1 Overview
+NHTS displays an on-chart panel derived from ActiveNikiTrader.Panel.cs (727 lines). The panel is the primary user interface for real-time signal monitoring and confluence configuration. P&L display is intentionally excluded — NinjaTrader natively provides this via the chart and Control Center Accounts tab.
+
+
+8.2 Panel Contents
+* Per-indicator state table: indicator name, current direction (LONG / SHORT), and inclusion checkbox.
+* AIQ_1Equivalent row: checkbox visible but non-clearable (mandatory trigger).
+* All other indicator rows: clearable checkboxes (optional confluence voters).
+* Confluence count display: e.g. 5/5 indicating current agreeing indicators vs threshold.
+* Signal display: LONG / SHORT / NO SIGNAL with visual highlight.
+* Run Analysis button: triggers the analysis pipeline on demand.
+* Audio alert toggle.
+* Auto-execution toggle.
+
+
+8.3 Confluence Threshold
+* Default threshold: 5 indicators must agree to fire a signal.
+* Threshold is configurable by the trader at runtime via the panel.
+* Minimum allowable threshold: to be determined during testing.
+
+
+9. Logging Architecture
+9.1 Structured Log
+NHTS writes a single structured log file in JSON Lines format (.jsonl) — one JSON object per event — to a configurable location on the client machine. The log is opened at session start, appended continuously throughout the session, and closed at session end.
+
+
+The NHTS .jsonl log is the sole input for the analysis engine. NinjaTrader native logs are not used by the analysis pipeline. This log consolidates all data previously split across ActiveNikiTrader's .txt log, optional .csv log, and NT8 native logs.
+
+
+9.2 Log Schema (representative event)
+{ "timestamp": "...", "event_type": "signal", "instrument": "NQ", "price": 19845.25, "signal_direction": "LONG", "confluence_count": 5, "confluence_threshold": 5, "indicators": { "AIQ_1": { "direction": "LONG", "included": true, "mandatory": true }, ... }, "order": { "action": "BUY", "auto_executed": true, ... } }
+
+
+9.3 Secondary Export
+CSV export is available as a secondary format generated by the analysis engine at report time from the .jsonl source, if required.
+
+
+10. Analysis Engine
+10.1 Architecture — V1 Hybrid
+The analysis engine is packaged as a self-contained Windows executable (built via pyinstaller from the consolidated Python pipeline). No Python installation is required on the client machine. The executable is bundled with the NHTS distribution.
+
+
+The engine is triggered by:
+* One-click via Run Analysis button in the NHTS panel.
+* Configurable scheduled task within NHTS settings (e.g. end-of-session, daily).
+
+
+10.2 Source Scripts
+The engine consolidates and streamlines the following existing scripts:
+* analysis.py — performance metric computation
+* parsers.py — log ingestion and parsing
+* report.py — report generation (ported to HTML output)
+* roundtrips.py — completed trade reconstruction
+* simulation.py — parameter variation testing
+* main.py — pipeline orchestration
+* config.py — configuration
+* Analyze-VPSTrades.ps1 and ActiveNikiNEW_DAY_Analysis.ps1 — retired as standalone scripts; logic absorbed into consolidated pipeline
+
+
+10.3 Report Delivery
+* Primary: HTML report opened automatically in the default browser. Zero configuration required.
+* Optional: Email delivery (configurable in NHTS settings). Not enabled by default.
+
+
+10.4 Report Contents (preserved from current pipeline)
+* Trade summary — entries, exits, P&L
+* Time slot analysis — per-hour breakdowns with LONG/SHORT splits
+* Key insights — profitable windows, underperforming indicators
+* Parameter optimization suggestions — trading hours, confluence threshold, trailing stop parameters
+
+
+10.5 V2+ — Embedded Analysis
+In a future milestone, the analysis logic will be ported to C# and fully embedded in the NT8 AddOn UI, eliminating the external executable dependency.
+
+
+11. Distribution and Licensing
+11.1 Business Model
+NHTS is a commercial product. Niki collects fees from traders and compensates Alex. Distribution is relationship-based — Niki manages access within her trader network.
+
+
+11.2 Pricing (pencilled in — subject to revision)
+
+
+Item
+	Detail
+	Pricing structure
+	One-time purchase
+	Licensing scope
+	Per machine. Each machine requires its own license.
+	License price
+	$250 per machine (one-time)
+	Annual renewal
+	$125/year after year one to continue receiving software updates. Trading continues uninterrupted without renewal; only access to new updates requires the renewal fee.
+	Trial period
+	5 business days, full features. After trial expires the machine is locked. Trader contacts Niki, who collects payment and adds the machine ID to the whitelist to restore access.
+	Whitelist
+	Niki may grant free access to specific machines at her discretion (e.g. her own machines, special arrangements). Whitelist is not tied to any trader group.
+	
+
+11.3 Distribution Mechanism
+V1 — Bob's Group and initial traders
+NHTS is distributed as a .ntsz import file via a private download link (e.g. restricted Google Drive folder) managed by Niki. Each trader installs on each machine via NinjaTrader's built-in import: File > Utilities > Import NinjaScript. License enforcement relies on the trial expiry and whitelist mechanism.
+
+
+V2 — Compiled .dll with license key system
+License key system introduced alongside the compiled .dll milestone. Keys tied to machine ID, issued by Niki upon payment. Supports the per-machine pricing model with optional expiry enforcement for annual renewal.
+
+
+V3 — NT8 AddOn ecosystem
+Full NT8 AddOn distribution with NinjaTrader ecosystem listing. Dependent on completion of the AddOn architecture milestone and NinjaTrader approval process.
+
+
+11.4 Support
+* Technical support provided by Alex.
+* Only the latest version of NHTS is supported at any given time.
+* Traders on older versions must update to receive support.
+* Niki is the first point of contact for traders — she handles payment, whitelist management, and escalates technical issues to Alex.
+
+
+12. Milestones
+
+
+Milestone
+	Description
+	Gate / Exit Criteria
+	M0Codebase Init
+	Fork ActiveNikiTrader into the NHTS branch. Perform global rename refactor: ActiveNikiTrader → NHTS across all .cs files, namespaces, and class names. Set up Visual Studio solution for external compilation.
+	NHTS compiles and runs in NT8 with no functional change from ActiveNikiTrader baseline.
+	M1NQ Strategy Bundle
+	NHTS strategy + Equivalent.cs indicators + NQ templates packaged as .ntsz. Panel derived from ActiveNikiTrader.Panel.cs. Confluence selector, audio alerts, auto-execution, and .jsonl logging implemented.
+	NHTS signals match ActiveNikiTrader baseline on NQ Market Replay data. Accepted by Alex.
+	M_loggingLogging & Analysis Pipeline
+	Consolidated .jsonl logging. Python scripts refactored into a single pipeline. Packaged as a pyinstaller executable. HTML report output. Run Analysis button and scheduled task in panel.
+	One-click analysis produces HTML report with all existing report sections preserved. Validated on at least 5 trading sessions.
+	M_CL_GCCL and GC Templates
+	Export Niki's CL and GC chart and strategy templates. Map indicators to Equivalent.cs set. Identify and develop any missing equivalents. Validate NHTS signals against reference charts on Market Replay.
+	Niki accepts NHTS signal equivalence for both CL and GC.
+	M2Compiled .dll
+	Pre-compile NHTS outside NT8 using Visual Studio. Ship binaries only — no source code in distribution. Configure NT8 to reference external assembly.
+	NHTS installs and runs from .dll with no source files exposed. Distribution tested on at least 2 machines.
+	M3License System
+	License key system introduced. Keys tied to machine ID per-machine pricing model. Trial expiry (5 business days) enforced. Niki manages whitelist and key issuance workflow.
+	License enforced: machines past trial and not whitelisted cannot run NHTS. Key issuance and revocation tested.
+	M4NT8 AddOn
+	Wrap compiled logic in NT8 AddOn framework. Rich WPF UI. Embedded analysis engine (C# port). NT8 menu integration. Professional distribution package.
+	AddOn installs via NT8 ecosystem. All V1 features present. Analysis runs inside NT8 without external executable.
+	
+
+13. Technical Dependencies and Notes
+* Visual Studio: installed. Requires configuration to pre-compile NT8 strategies as external assemblies, referencing NT8's own assemblies (NinjaTrader.Core.dll, NinjaTrader.Client.dll, etc.). This is a dedicated setup task at M2.
+* pyinstaller: required at M_logging to package Python analysis pipeline as self-contained Windows executable.
+* NT8 UniRenko bars: bar size parameters are instrument-specific and will be calibrated per instrument template.
+* SMTP / email delivery: optional report delivery feature. Configuration complexity varies by client machine; not enabled by default.
+* Multi-machine deployment: traders may run NHTS on multiple machines simultaneously. Logging paths and scheduled tasks must be independently configurable per machine.
+
+
+14. Out of Scope for V1
+* P&L display in panel (handled natively by NT8).
+* ninZa.co indicator integrations (abandoned; replaced by *Equivalent.cs implementations).
+* Cloud dashboard or centralized reporting infrastructure.
+* Mobile or web interface.
+* Brokers other than those supported by NinjaTrader 8.
+* Instruments other than NQ, CL, and GC.
+
+
+15. Open Items
+
+
+Minimum confluence threshold
+	To be determined during testing (M1).
+	CL / GC UniRenko bar sizes
+	To be captured from Niki's templates (M_CL_GC).
+	Licensing model — revenue split
+	Split between Niki and Alex TBD.
+	Annual renewal enforcement
+	Whether non-renewed machines lose access or only lose updates — TBD (M3).
+	Report delivery — email setup UX
+	Optimal configuration flow for non-technical traders TBD (M_logging).
+	Missing Equivalent indicators for CL/GC
+	Gap analysis pending template capture (M_CL_GC).
+	
+
+Revision History
+
+
+Version
+	Date
+	Notes
+	0.1
+	April 2026
+	Initial draft. All sections through the M4 milestone arc defined.
+	0.2
+	April 2026
+	Stakeholders updated (Alex, Niki). Licensing and distribution model fully specced: $250/machine one-time, 5-day trial, $125/year renewal, whitelist mechanism. All Reference Trader references updated to Niki.
+	
+
+NHTS PRD — Confidential    |    Page  of:
