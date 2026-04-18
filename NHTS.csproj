@@ -79,7 +79,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Strategies\NHTS.cs" />
-    <Compile Include="Strategies\NHTS.Indicators.cs" />
     <Compile Include="Strategies\NHTS.Logging.cs" />
     <Compile Include="Strategies\NHTS.Panel.cs" />
     <Compile Include="Strategies\NHTS.Signals.cs" />
@@ -92,6 +91,9 @@
     <Compile Include="Indicators\SolarWaveEquivalent.cs" />
     <Compile Include="Indicators\T3ProEquivalent.cs" />
     <Compile Include="Indicators\VIDYAProEquivalent.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Strategies\NHTS.Indicators.cs.bak" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
