@@ -89,7 +89,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 };
                 
                 var stack = new StackPanel();
-                stack.Children.Add(new TextBlock { Text = "No Headache Trading", FontWeight = FontWeights.Bold, Foreground = Brushes.Cyan, FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 2) });
+                stack.Children.Add(new TextBlock { Text = "ANTrading", FontWeight = FontWeights.Bold, Foreground = Brushes.Cyan, FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 2) });
                 lblSubtitle = new TextBlock { Foreground = Brushes.LightGray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,0,0,6) };
                 stack.Children.Add(lblSubtitle);
                 

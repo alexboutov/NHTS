@@ -73,9 +73,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             LogAlways($"  EasyTrend:    HOSTED");
             LogAlways($"  SolarWave:    HOSTED");
             LogAlways($"  T3Pro:        HOSTED");
-            LogAlways($"  AAATrendSync: N/A (no hosted equivalent)");
+            LogAlways($"  AAATrendSync: HOSTED (AAATrendSyncEquivalent)");
             LogAlways($"  AIQ_1:        HOSTED (AIQ_1Equivalent)");
-            LogAlways($"  AIQ_SuperBands: N/A (no hosted equivalent)");
+            LogAlways($"  AIQ_SuperBands: HOSTED (AIQ_SuperBandsEquivalent)");
             LogAlways($"--------------------------------");
         }
         private void LogAlways(string msg)
@@ -124,21 +124,10 @@ namespace NinjaTrader.NinjaScript.Strategies
         [Browsable(false)] public bool SW_IsUp => solarWaveEquivalent?.IsUptrend ?? false;
         [Browsable(false)] public int SW_Count => solarWaveEquivalent?.CountWave ?? 0;
         [Browsable(false)] public bool T3P_IsUp => t3ProEquivalent?.IsUptrend ?? false;
-        
-        // AAATrendSync - no hosted equivalent; always false when forcing hosted-only deployment
-        [Browsable(false)] public bool AAA_IsUp => false;
-        [Browsable(false)] public bool AAA_Available => false;
-        
-        // AIQ_SuperBands - no hosted equivalent; always false when forcing hosted-only
-        [Browsable(false)] public bool SB_IsUp 
-        {
-            get 
-            {
-                return false;
-            }
-        }
-        [Browsable(false)] public bool SB_Available => false;
-        
+        [Browsable(false)] public bool AAA_IsUp => aaaTrendSyncEquivalent?.IsUptrend ?? false;
+        [Browsable(false)] public bool AAA_Available => true;
+        [Browsable(false)] public bool SB_IsUp => aiqSuperBandsEquivalent?.IsUptrend ?? false;
+        [Browsable(false)] public bool SB_Available => true;   
         // AIQ_1 trigger indicator - HOSTED ONLY
         [Browsable(false)] public bool AIQ1_IsUp 
         {
@@ -302,7 +291,51 @@ namespace NinjaTrader.NinjaScript.Strategies
 
             return _ind;
         }
+        private AAATrendSyncEquivalent[] _cacheAAATrendSync;
+        private AAATrendSyncEquivalent AAATrendSyncEquivalent(
+            int fastPeriod, bool fastSmoothingEnabled, int fastSmoothingPeriod,
+            int midPeriod, bool midSmoothingEnabled, int midSmoothingPeriod,
+            int slowPeriod, bool slowSmoothingEnabled, int slowSmoothingPeriod,
+            bool minSpreadEnabled, double minSpreadATRMultiplier, int minSpreadATRPeriod,
+            bool showMarkers, int markerOffset,
+            string uptrendMarker, string downtrendMarker)
+        {
+            var _ind = new AAATrendSyncEquivalent {
+                FastPeriod = fastPeriod, FastSmoothingEnabled = fastSmoothingEnabled,
+                FastSmoothingPeriod = fastSmoothingPeriod,
+                MidPeriod = midPeriod, MidSmoothingEnabled = midSmoothingEnabled,
+                MidSmoothingPeriod = midSmoothingPeriod,
+                SlowPeriod = slowPeriod, SlowSmoothingEnabled = slowSmoothingEnabled,
+                SlowSmoothingPeriod = slowSmoothingPeriod,
+                MinSpreadEnabled = minSpreadEnabled,
+                MinSpreadATRMultiplier = minSpreadATRMultiplier,
+                MinSpreadATRPeriod = minSpreadATRPeriod,
+                ShowMarkers = showMarkers, MarkerOffset = markerOffset,
+                UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker
+            };
+            return _ind;
+        }
 
+        private AIQ_SuperBandsEquivalent[] _cacheAIQSuperBands;
+        private AIQ_SuperBandsEquivalent AIQ_SuperBandsEquivalent(
+            int halfLengthMain, double bandsDeviationMain,
+            int halfLengthFast, double bandsDeviationFast,
+            bool staticBands, bool optimizeMainDeviation, int maxOutOfBandPercent,
+            double pctAbove, double pctBelow,
+            bool enableMainBands, bool enableFastBands,
+            bool enableTriangles, bool enableLines)
+        {
+            var _ind = new AIQ_SuperBandsEquivalent {
+                HalfLength_Main = halfLengthMain, BandsDeviation_Main = bandsDeviationMain,
+                HalfLength_Fast = halfLengthFast, BandsDeviation_Fast = bandsDeviationFast,
+                StaticBands = staticBands, OptimizeMainDeviation = optimizeMainDeviation,
+                MaxOutOfBandPercent = maxOutOfBandPercent,
+                PctAbove = pctAbove, PctBelow = pctBelow,
+                EnableMainBands = enableMainBands, EnableFastBands = enableFastBands,
+                EnableTriangles = enableTriangles, EnableLines = enableLines
+            };
+            return _ind;
+        }
         #endregion
     }
 }

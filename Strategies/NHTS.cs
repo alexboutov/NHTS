@@ -70,6 +70,8 @@ namespace NinjaTrader.NinjaScript.Strategies
         private DragonTrendEquivalent dragonTrendEquivalent;
         private SolarWaveEquivalent solarWaveEquivalent;
         private AIQ_1Equivalent aiq1Equivalent;
+        private AAATrendSyncEquivalent aaaTrendSyncEquivalent;
+        private AIQ_SuperBandsEquivalent aiqSuperBandsEquivalent;
         
         // Auto-switch flags
         private bool useHostedT3Pro, useHostedVIDYAPro, useHostedEasyTrend;
@@ -606,6 +608,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                 // Initialize AIQ_1 trigger indicator (hosted fallback)
                 aiq1Equivalent = AIQ_1Equivalent(3, 0, AIQ1EquivMAMethod.MA1, true, 0.05, 0.05, 0.03, 0.03,
                     true, 15, 100, false, 4, Brushes.Orange, Brushes.Orange);
+                aaaTrendSyncEquivalent = AAATrendSyncEquivalent(10, true, 2, 20, true, 2, 30, true, 5, true, 0.05, 100, true, 10, "▲", "▼");
+                aiqSuperBandsEquivalent = AIQ_SuperBandsEquivalent(101, 2.5, 11, 3.0, false, true, 7, 0.05, 0.05, true, false, true, true);
                 
                 // Initialize ATR for dynamic exit trailing stop
                 atrIndicator = ATR(14);
