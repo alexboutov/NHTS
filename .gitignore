@@ -41,3 +41,5 @@ obj/
 *.pdb
 *.csproj.user
 dir
+*.bak
+*.copilot
