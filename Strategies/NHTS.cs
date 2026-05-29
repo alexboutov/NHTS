@@ -62,16 +62,6 @@ namespace NinjaTrader.NinjaScript.Strategies
         private bool useChartAAA;
         private bool useChartSB;
         
-        // Equivalent indicators (hosted by strategy - fallback only)
-        private T3ProEquivalent t3ProEquivalent;
-        private VIDYAProEquivalent vidyaProEquivalent;
-        private EasyTrendEquivalent easyTrendEquivalent;
-        private RubyRiverEquivalent rubyRiverEquivalent;
-        private DragonTrendEquivalent dragonTrendEquivalent;
-        private SolarWaveEquivalent solarWaveEquivalent;
-        private AIQ_1Equivalent aiq1Equivalent;
-        private AAATrendSyncEquivalent aaaTrendSyncEquivalent;
-        private AIQ_SuperBandsEquivalent aiqSuperBandsEquivalent;
         
         // Auto-switch flags
         private bool useHostedT3Pro, useHostedVIDYAPro, useHostedEasyTrend;
@@ -131,14 +121,10 @@ namespace NinjaTrader.NinjaScript.Strategies
         private bool dynamicExitActive = false;
         private double entryPrice = 0;
         private double trailStopPrice = 0;
-        private ATR atrIndicator;
         
         // Simple trailing stop tracking (tick-based)
         private bool simpleTrailActive = false;
         private double simpleTrailStopLevel = 0;
-        
-        // ATR-based trailing stop
-        private ATR atrTrailIndicator;
         
         // Slippage tracking - capture intended prices at signal time
         private double signalPriceAtEntry = 0;      // Ask/Bid when order placed
@@ -423,12 +409,12 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         [NinjaScriptProperty]
         [Range(0.5, 5.0)]
-        [Display(Name="ATR Trail Distance Mult", Description="Trail distance = ATR × this multiplier (default 1.5)", Order=4, GroupName="12a. Trailing Stop")]
+        [Display(Name="ATR Trail Distance Mult", Description="Trail distance = ATR x this multiplier (default 1.5)", Order=4, GroupName="12a. Trailing Stop")]
         public double ATRTrailDistanceMultiplier { get; set; }
         
         [NinjaScriptProperty]
         [Range(1.0, 10.0)]
-        [Display(Name="ATR Trail Activation Mult", Description="Activate trail when profit >= ATR × this multiplier (default 2.0)", Order=5, GroupName="12a. Trailing Stop")]
+        [Display(Name="ATR Trail Activation Mult", Description="Activate trail when profit >= ATR x this multiplier (default 2.0)", Order=5, GroupName="12a. Trailing Stop")]
         public double ATRTrailActivationMultiplier { get; set; }
         
         [NinjaScriptProperty]
@@ -462,7 +448,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 TimeInForce = TimeInForce.Gtc;
                 RealtimeErrorHandling = RealtimeErrorHandling.StopCancelClose;
                 StopTargetHandling = StopTargetHandling.PerEntryExecution;
-                BarsRequiredToTrade = 20;
+                BarsRequiredToTrade = 0;
                 
                 // Signal filters
                 MinConfluenceRequired = 5;
@@ -474,8 +460,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 EnableAutoTrading = false;
                 MinConfluenceForAutoTrade = 5;
                 
-                // Trading hours filter - Optimized based on backtest analysis (10:00-11:00 only)
-                // Data: 182 trades, 38% win rate, +1,666t total, +9.2t per trade
+                // Trading hours filter
                 UseTradingHoursFilter = true;
                 Session1StartHour = 10;
                 Session1StartMinute = 0;
@@ -551,7 +536,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 // UniRenko settings
                 UniRenkoMode = false;
                 UseTimeBasedCooldown = false;
-                CooldownSeconds = 120;  // 2 minutes default
+                CooldownSeconds = 120;
                 LogBarDetails = false;
                 
                 // Risk Management
@@ -560,24 +545,24 @@ namespace NinjaTrader.NinjaScript.Strategies
                 EnableDailyProfitTarget = true;
                 DailyProfitTargetUSD = 600;
                 ResetDailyPnLAtSessionStart = true;
-                StopLossBufferTicks = 2;  // Add 2 ticks buffer to reduce slippage
+                StopLossBufferTicks = 2;
                 
-                // Dynamic Exit - let profits run when trend continues
-                EnableDynamicExit = false;  // Disabled - using simpler trailing stop instead
+                // Dynamic Exit
+                EnableDynamicExit = false;
                 MinConfluenceToStay = 4;
                 TrailStopATRMultiplier = 1.5;
-                MaxProfitUSD = 500;  // Force exit at $500 profit
+                MaxProfitUSD = 500;
                 
                 // Trailing Stop Settings
                 EnableTrailingStop = true;
-                UseATRBasedTrail = true;           // NEW: Default to ATR-based
-                ATRTrailPeriod = 14;               // NEW: 14-period ATR
-                ATRTrailDistanceMultiplier = 1.5;  // NEW: Trail Distance = 1.5× ATR
-                ATRTrailActivationMultiplier = 2.0; // NEW: Activation = 2× ATR
-                TrailActivationTicks = 80;         // Tick-based fallback: Activate after +80t
-                TrailDistanceTicks = 30;           // Tick-based fallback: Trail 30t behind
+                UseATRBasedTrail = true;
+                ATRTrailPeriod = 14;
+                ATRTrailDistanceMultiplier = 1.5;
+                ATRTrailActivationMultiplier = 2.0;
+                TrailActivationTicks = 80;
+                TrailDistanceTicks = 30;
                 
-                // Debug - CSV indicator logging OFF by default
+                // Debug
                 EnableIndicatorCSVLog = false;
             }
             else if (State == State.DataLoaded)
@@ -586,48 +571,17 @@ namespace NinjaTrader.NinjaScript.Strategies
                 InitializeLogFile();
                 InitializeCSVLog();
                 
-                // Initialize all equivalent indicators (hosted by strategy)
-                t3ProEquivalent = T3ProEquivalent(T3ProMAType.EMA, T3ProPeriod, T3ProTCount, T3ProVFactor,
-                    T3ProChaosSmoothingEnabled, T3ProMAType.DEMA, T3ProChaosSmoothingPeriod,
-                    T3ProFilterEnabled, T3ProFilterMultiplier, 14, true, false, "▲", "▼", 10);
-                vidyaProEquivalent = VIDYAProEquivalent(VIDYAPeriod, VIDYAVolatilityPeriod, VIDYASmoothingEnabled,
-                    VIDYAProMAType.EMA, VIDYASmoothingPeriod, VIDYAFilterEnabled, VIDYAFilterMultiplier, 14,
-                    true, false, "▲", "▼", 10);
-                easyTrendEquivalent = EasyTrendEquivalent(EasyTrendMAType.EMA, EasyTrendPeriod, EasyTrendSmoothingEnabled,
-                    EasyTrendMAType.EMA, EasyTrendSmoothingPeriod, EasyTrendFilterEnabled, true,
-                    EasyTrendFilterMultiplier, EasyTrendFilterUnit.ninZaATR, EasyTrendATRPeriod,
-                    true, false, "▲ + Easy", "Easy + ▼", 10);
-                rubyRiverEquivalent = RubyRiverEquivalent(RubyRiverMAType.EMA, RubyRiverMAPeriod, RubyRiverSmoothingEnabled,
-                    RubyRiverMAType.LinReg, RubyRiverSmoothingPeriod, RubyRiverOffsetMultiplier, RubyRiverOffsetPeriod,
-                    true, false, "▲", "▼", 10);
-                dragonTrendEquivalent = DragonTrendEquivalent(DragonTrendPeriod, DragonTrendSmoothingEnabled,
-                    DragonTrendMAType.EMA, DragonTrendSmoothingPeriod, false, "▲", "▼", 10);
-                solarWaveEquivalent = SolarWaveEquivalent(SolarWaveATRPeriod, SolarWaveTrendMultiplier, SolarWaveStopMultiplier,
-                    2, 1, 5, 10, 10, true, false, "▲ + Trend", "Trend + ▼", 12);
-                
-                // Initialize AIQ_1 trigger indicator (hosted fallback)
-                aiq1Equivalent = AIQ_1Equivalent(3, 0, AIQ1EquivMAMethod.MA1, true, 0.05, 0.05, 0.03, 0.03,
-                    true, 15, 100, false, 4, Brushes.Orange, Brushes.Orange);
-                aaaTrendSyncEquivalent = AAATrendSyncEquivalent(10, true, 2, 20, true, 2, 30, true, 5, true, 0.05, 100, true, 10, "▲", "▼");
-                aiqSuperBandsEquivalent = AIQ_SuperBandsEquivalent(101, 2.5, 11, 3.0, false, true, 7, 0.05, 0.05, true, false, true, true);
-                
-                // Initialize ATR for dynamic exit trailing stop
-                atrIndicator = ATR(14);
-                
-                // Initialize ATR for trailing stop (separate indicator with configurable period)
-                atrTrailIndicator = ATR(ATRTrailPeriod);
-                
-                LogAlways($"NHTS | 7-indicator confluence | Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
+                LogAlways($"NHTS | 7-indicator confluence | Signal\u2265{MinConfluenceRequired} Trade\u2265{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
                 if (StopLossBufferTicks > 0)
                     LogAlways($"SL Buffer: {StopLossBufferTicks} ticks");
                 if (EnableDynamicExit)
-                    LogAlways($"🚀 Dynamic Exit: ON | MinConf={MinConfluenceToStay} | Trail={TrailStopATRMultiplier}xATR | MaxProfit=${MaxProfitUSD}");
+                    LogAlways($"\U0001f6a7 Dynamic Exit: ON | MinConf={MinConfluenceToStay} | Trail={TrailStopATRMultiplier}xATR | MaxProfit=${MaxProfitUSD}");
                 if (EnableTrailingStop)
                 {
                     if (UseATRBasedTrail)
-                        LogAlways($"📈 Trailing Stop: ATR-BASED | Period={ATRTrailPeriod} | Activate={ATRTrailActivationMultiplier}×ATR | Distance={ATRTrailDistanceMultiplier}×ATR");
+                        LogAlways($"\U0001f4c8 Trailing Stop: ATR-BASED | Period={ATRTrailPeriod} | Activate={ATRTrailActivationMultiplier}\u00d7ATR | Distance={ATRTrailDistanceMultiplier}\u00d7ATR");
                     else
-                        LogAlways($"📈 Trailing Stop: TICK-BASED | Activate={TrailActivationTicks}t | Distance={TrailDistanceTicks}t");
+                        LogAlways($"\U0001f4c8 Trailing Stop: TICK-BASED | Activate={TrailActivationTicks}t | Distance={TrailDistanceTicks}t");
                 }
                 if (UniRenkoMode)
                 {
@@ -644,11 +598,11 @@ namespace NinjaTrader.NinjaScript.Strategies
                 if (CloseAtEndOfDay)
                     LogAlways($"Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2}");
                 if (EnableDailyLossLimit)
-                    LogAlways($"🛡️ Daily Loss Limit: ${DailyLossLimitUSD:F0}");
+                    LogAlways($"\U0001f6e1\ufe0f Daily Loss Limit: ${DailyLossLimitUSD:F0}");
                 if (EnableDailyProfitTarget)
-                    LogAlways($"🎯 Daily Profit Target: ${DailyProfitTargetUSD:F0}");
+                    LogAlways($"\U0001f3af Daily Profit Target: ${DailyProfitTargetUSD:F0}");
                 if (EnableIndicatorCSVLog)
-                    LogAlways($"📊 CSV Indicator Log: ENABLED");
+                    LogAlways($"\U0001f4ca CSV Indicator Log: ENABLED");
             }
             else if (State == State.Historical)
             {
@@ -666,7 +620,11 @@ namespace NinjaTrader.NinjaScript.Strategies
         
         protected override void OnBarUpdate()
         {
-            if (CurrentBar < BarsRequiredToTrade || !indicatorsReady) return;
+            if (!indicatorsReady) return;
+            if (CurrentBar < BarsRequiredToTrade) { UpdateHostedCalculators(); return; }
+            
+            // Update hosted indicator calculators (Option B - pure C# fallback)
+            UpdateHostedCalculators();
             
             DateTime barTime = Time[0];
             
@@ -677,7 +635,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (ResetDailyPnLAtSessionStart && barTime.Date != lastTradeDate.Date)
             {
                 if (dailyPnL != 0 || dailyTradeCount > 0)
-                    PrintAndLog($"📊 NEW DAY: Resetting Daily P&L (was ${dailyPnL:F2}, {dailyTradeCount} trades)", barTime);
+                    PrintAndLog($"\U0001f4ca NEW DAY: Resetting Daily P&L (was ${dailyPnL:F2}, {dailyTradeCount} trades)", barTime);
                 dailyPnL = 0;
                 dailyTradeCount = 0;
                 dailyLossLimitHit = false;
@@ -745,7 +703,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 double pointValue = Instrument.MasterInstrument.PointValue;
                 double tpPoints = pointValue > 0 ? TakeProfitUSD / pointValue : 10;
                 double maxProfitPoints = pointValue > 0 ? MaxProfitUSD / pointValue : 25;
-                double atrValue = atrIndicator[0];
+                double atrValue = _atrCalc.Value;
                 
                 var (bull, bear, total) = GetConfluence();
                 bool isLong = Position.MarketPosition == MarketPosition.Long;
@@ -760,12 +718,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                     if (isLong)
                     {
                         ExitLong("Long", "MaxProfit Exit");
-                        PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}", barTime);
+                        PrintAndLog($"\U0001f3af DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}", barTime);
                     }
                     else
                     {
                         ExitShort("Short", "MaxProfit Exit");
-                        PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}", barTime);
+                        PrintAndLog($"\U0001f3af DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | MAX PROFIT HIT ${unrealizedPnL:F2}", barTime);
                     }
                     entryPrice = 0;
                     dynamicExitActive = false;
@@ -788,19 +746,19 @@ namespace NinjaTrader.NinjaScript.Strategies
                             else
                                 SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
                                 
-                            PrintAndLog($"🚀 DYNAMIC MODE ACTIVATED @ {barTime:HH:mm:ss} | P&L=${unrealizedPnL:F2} | Trail={trailStopPrice:F2} | Conf={bull}/{bear}", barTime);
+                            PrintAndLog($"\U0001f6a7 DYNAMIC MODE ACTIVATED @ {barTime:HH:mm:ss} | P&L=${unrealizedPnL:F2} | Trail={trailStopPrice:F2} | Conf={bull}/{bear}", barTime);
                         }
                         else
                         {
                             if (isLong)
                             {
                                 ExitLong("Long", "DynamicTP Exit");
-                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | Conf dropped (Bull:{bull}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}", barTime);
+                                PrintAndLog($"\U0001f3af DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | Conf dropped (Bull:{bull}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}", barTime);
                             }
                             else
                             {
                                 ExitShort("Short", "DynamicTP Exit");
-                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | Conf dropped (Bear:{bear}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}", barTime);
+                                PrintAndLog($"\U0001f3af DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | Conf dropped (Bear:{bear}<{MinConfluenceToStay}) | P&L=${unrealizedPnL:F2}", barTime);
                             }
                             entryPrice = 0;
                         }
@@ -816,7 +774,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                             {
                                 trailStopPrice = newTrailStop;
                                 SetStopLoss("Long", CalculationMode.Price, trailStopPrice, true);
-                                PrintAndLog($"📈 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}", barTime);
+                                PrintAndLog($"\U0001f4c8 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}", barTime);
                             }
                             
                             if (currentPrice <= trailStopPrice || !trendStillValid || !confluenceConfirmsTrend)
@@ -824,7 +782,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                                 ExitLong("Long", "DynamicTrail Exit");
                                 string reason = currentPrice <= trailStopPrice ? "Trail Stop Hit" : 
                                                 !trendStillValid ? "RR Flipped" : $"Conf={bull}<{MinConfluenceToStay}";
-                                PrintAndLog($"🎯 DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}", barTime);
+                                PrintAndLog($"\U0001f3af DYNAMIC EXIT LONG @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}", barTime);
                                 entryPrice = 0;
                                 dynamicExitActive = false;
                             }
@@ -836,7 +794,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                             {
                                 trailStopPrice = newTrailStop;
                                 SetStopLoss("Short", CalculationMode.Price, trailStopPrice, true);
-                                PrintAndLog($"📉 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}", barTime);
+                                PrintAndLog($"\U0001f4c9 TRAIL STOP UPDATED @ {barTime:HH:mm:ss} | New Stop={trailStopPrice:F2} | P&L=${unrealizedPnL:F2}", barTime);
                             }
                             
                             if (currentPrice >= trailStopPrice || !trendStillValid || !confluenceConfirmsTrend)
@@ -844,7 +802,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                                 ExitShort("Short", "DynamicTrail Exit");
                                 string reason = currentPrice >= trailStopPrice ? "Trail Stop Hit" : 
                                                 !trendStillValid ? "RR Flipped" : $"Conf={bear}<{MinConfluenceToStay}";
-                                PrintAndLog($"🎯 DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}", barTime);
+                                PrintAndLog($"\U0001f3af DYNAMIC EXIT SHORT @ {barTime:HH:mm:ss} | {reason} | P&L=${unrealizedPnL:F2}", barTime);
                                 entryPrice = 0;
                                 dynamicExitActive = false;
                             }
@@ -859,32 +817,27 @@ namespace NinjaTrader.NinjaScript.Strategies
                 double currentPrice = Close[0];
                 bool isLong = Position.MarketPosition == MarketPosition.Long;
                 
-                // Calculate current profit in ticks
                 double profitTicks = isLong 
                     ? (currentPrice - entryPrice) / TickSize 
                     : (entryPrice - currentPrice) / TickSize;
                 
-                // Determine activation threshold and trail distance based on mode
                 double activationThresholdTicks;
                 double trailDistancePoints;
                 double atrValue = 0;
                 
                 if (UseATRBasedTrail)
                 {
-                    // ATR-based trailing stop
-                    atrValue = atrTrailIndicator[0];
+                    atrValue = _atrTrailCalc.Value;
                     double atrInTicks = atrValue / TickSize;
                     activationThresholdTicks = atrInTicks * ATRTrailActivationMultiplier;
                     trailDistancePoints = atrValue * ATRTrailDistanceMultiplier;
                 }
                 else
                 {
-                    // Fixed tick-based trailing stop
                     activationThresholdTicks = TrailActivationTicks;
                     trailDistancePoints = TrailDistanceTicks * TickSize;
                 }
                 
-                // Check if we should activate the trail
                 if (!simpleTrailActive && profitTicks >= activationThresholdTicks)
                 {
                     simpleTrailActive = true;
@@ -892,27 +845,23 @@ namespace NinjaTrader.NinjaScript.Strategies
                         ? currentPrice - trailDistancePoints 
                         : currentPrice + trailDistancePoints;
                     
-                    // Update expected stop for slippage tracking
                     expectedStopPrice = simpleTrailStopLevel;
                     
-                    // Update stop loss to trailing level
                     if (isLong)
                         SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
                     else
                         SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
                     
                     if (UseATRBasedTrail)
-                        PrintAndLog($"📈 TRAIL ACTIVATED (ATR) @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | ATR={atrValue:F2} | Thresh={activationThresholdTicks:F0}t | Dist={trailDistancePoints:F2} | Stop={simpleTrailStopLevel:F2}", barTime);
+                        PrintAndLog($"\U0001f4c8 TRAIL ACTIVATED (ATR) @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | ATR={atrValue:F2} | Thresh={activationThresholdTicks:F0}t | Dist={trailDistancePoints:F2} | Stop={simpleTrailStopLevel:F2}", barTime);
                     else
-                        PrintAndLog($"📈 TRAIL ACTIVATED @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | Trail Stop={simpleTrailStopLevel:F2}", barTime);
+                        PrintAndLog($"\U0001f4c8 TRAIL ACTIVATED @ {barTime:yyyy-MM-dd HH:mm:ss} | Profit={profitTicks:F0}t | Trail Stop={simpleTrailStopLevel:F2}", barTime);
                 }
-                // Update trailing stop if already active (only move in favorable direction)
                 else if (simpleTrailActive)
                 {
-                    // Recalculate trail distance (for ATR mode, it may change each bar)
                     if (UseATRBasedTrail)
                     {
-                        atrValue = atrTrailIndicator[0];
+                        atrValue = _atrTrailCalc.Value;
                         trailDistancePoints = atrValue * ATRTrailDistanceMultiplier;
                     }
                     
@@ -922,12 +871,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                         if (newTrailStop > simpleTrailStopLevel)
                         {
                             simpleTrailStopLevel = newTrailStop;
-                            expectedStopPrice = simpleTrailStopLevel;  // Update expected stop for slippage tracking
+                            expectedStopPrice = simpleTrailStopLevel;
                             SetStopLoss("Long", CalculationMode.Price, simpleTrailStopLevel, true);
                             if (UseATRBasedTrail)
-                                PrintAndLog($"📈 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t", barTime);
+                                PrintAndLog($"\U0001f4c8 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t", barTime);
                             else
-                                PrintAndLog($"📈 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t", barTime);
+                                PrintAndLog($"\U0001f4c8 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t", barTime);
                         }
                     }
                     else
@@ -936,12 +885,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                         if (newTrailStop < simpleTrailStopLevel)
                         {
                             simpleTrailStopLevel = newTrailStop;
-                            expectedStopPrice = simpleTrailStopLevel;  // Update expected stop for slippage tracking
+                            expectedStopPrice = simpleTrailStopLevel;
                             SetStopLoss("Short", CalculationMode.Price, simpleTrailStopLevel, true);
                             if (UseATRBasedTrail)
-                                PrintAndLog($"📉 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t", barTime);
+                                PrintAndLog($"\U0001f4c9 TRAIL UPDATED (ATR) @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | ATR={atrValue:F2} | Profit={profitTicks:F0}t", barTime);
                             else
-                                PrintAndLog($"📉 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t", barTime);
+                                PrintAndLog($"\U0001f4c9 TRAIL UPDATED @ {barTime:HH:mm:ss} | Stop={simpleTrailStopLevel:F2} | Profit={profitTicks:F0}t", barTime);
                         }
                     }
                 }
@@ -954,7 +903,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                 trailStopPrice = 0;
                 simpleTrailActive = false;
                 simpleTrailStopLevel = 0;
-                // Reset slippage tracking
                 signalPriceAtEntry = 0;
                 expectedStopPrice = 0;
                 expectedTargetPrice = 0;
@@ -991,18 +939,18 @@ namespace NinjaTrader.NinjaScript.Strategies
                 barsSinceYellowSquare = 0;
                 barsSinceOrangeSquare = -1;
                 if (inCooldown)
-                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})", barTime);
+                    PrintAndLog($"\U0001f7e8 Yellow Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})", barTime);
                 else
-                    PrintAndLog($"🟨 Yellow Square @ {barTime:HH:mm:ss} | LONG window opened (0/{MaxBarsAfterYellowSquare})", barTime);
+                    PrintAndLog($"\U0001f7e8 Yellow Square @ {barTime:HH:mm:ss} | LONG window opened (0/{MaxBarsAfterYellowSquare})", barTime);
             }
             else if (orangeSquareAppeared)
             {
                 barsSinceOrangeSquare = 0;
                 barsSinceYellowSquare = -1;
                 if (inCooldown)
-                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})", barTime);
+                    PrintAndLog($"\U0001f7e7 Orange Square @ {barTime:HH:mm:ss} | BLOCKED by cooldown ({cooldownStatus})", barTime);
                 else
-                    PrintAndLog($"🟧 Orange Square @ {barTime:HH:mm:ss} | SHORT window opened (0/{MaxBarsAfterYellowSquare})", barTime);
+                    PrintAndLog($"\U0001f7e7 Orange Square @ {barTime:HH:mm:ss} | SHORT window opened (0/{MaxBarsAfterYellowSquare})", barTime);
             }
             else if (barsSinceYellowSquare >= 0)
             {
@@ -1045,8 +993,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("LONG", "YellowSquare+" + confirmingIndicator, barTime, bull, total);
                         UpdateSignalDisplay("YellowSquare+" + confirmingIndicator, bull, total, barTime, true);
 
-						if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && confirmingIndicator != "RR" && confirmingIndicator != "DT")
-						// if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && confirmingIndicator != "RR")
+                        if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && confirmingIndicator != "RR" && confirmingIndicator != "DT")
                         {
                             if (bull >= MinConfluenceForAutoTrade)
                             {
@@ -1057,7 +1004,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     
                                     double slTicks = (stopPoints / TickSize) + StopLossBufferTicks;
                                     
-                                    // Capture signal price and expected levels for slippage tracking
                                     signalPriceAtEntry = GetCurrentAsk();
                                     expectedStopPrice = signalPriceAtEntry - (slTicks * TickSize);
                                     expectedTargetPrice = signalPriceAtEntry + tpPoints;
@@ -1071,7 +1017,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     }
                                     else if (EnableTrailingStop)
                                     {
-                                        // Trailing stop: Set SL and TP, track entry for trail activation
                                         SetStopLoss("Long", CalculationMode.Ticks, slTicks, true);
                                         SetProfitTarget("Long", CalculationMode.Ticks, tpPoints / TickSize);
                                         entryPrice = GetCurrentAsk();
@@ -1122,9 +1067,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("SHORT", "OrangeSquare+" + confirmingIndicator, barTime, bear, total);
                         UpdateSignalDisplay("OrangeSquare+" + confirmingIndicator, bear, total, barTime, false);
                         
-	                    // if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat)
-						// Only take SHORT if RR is UP (contrarian filter)
-						if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && RR_IsUp)
+                        if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && RR_IsUp)
                         {
                             if (bear >= MinConfluenceForAutoTrade)
                             {
@@ -1135,7 +1078,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     
                                     double slTicks = (stopPoints / TickSize) + StopLossBufferTicks;
                                     
-                                    // Capture signal price and expected levels for slippage tracking
                                     signalPriceAtEntry = GetCurrentBid();
                                     expectedStopPrice = signalPriceAtEntry + (slTicks * TickSize);
                                     expectedTargetPrice = signalPriceAtEntry - tpPoints;
@@ -1149,7 +1091,6 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     }
                                     else if (EnableTrailingStop)
                                     {
-                                        // Trailing stop: Set SL and TP, track entry for trail activation
                                         SetStopLoss("Short", CalculationMode.Ticks, slTicks, true);
                                         SetProfitTarget("Short", CalculationMode.Ticks, tpPoints / TickSize);
                                         entryPrice = GetCurrentBid();

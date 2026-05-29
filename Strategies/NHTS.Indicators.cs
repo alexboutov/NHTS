@@ -60,6 +60,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             chartAAATrendSyncEquiv = null;
             chartAiqSuperBandsEquiv = null;
 
+            InitHostedCalculators();
             indicatorsReady = true;
             return;
         }
@@ -115,228 +116,23 @@ namespace NinjaTrader.NinjaScript.Strategies
         private int GetChartInt(object o, PropertyInfo p) { try { return o != null && p != null ? (int)p.GetValue(o) : 0; } catch { return 0; } }
 
         // Indicator value accessors - HOSTED ONLY (chart/native detection intentionally disabled)
-        [Browsable(false)] public bool RR_IsUp => rubyRiverEquivalent?.IsUptrend ?? false;
-        [Browsable(false)] public bool VY_IsUp => vidyaProEquivalent?.IsUptrend ?? false;
-        [Browsable(false)] public bool ET_IsUp => easyTrendEquivalent?.IsUptrend ?? false;
-        [Browsable(false)] public double DT_Signal => dragonTrendEquivalent?.PrevSignal ?? 0;
+        [Browsable(false)] public bool RR_IsUp => _rrCalc != null ? _rrCalc.IsUptrend : false;
+        [Browsable(false)] public bool VY_IsUp => _vidyaCalc != null ? _vidyaCalc.IsUptrend : false;
+        [Browsable(false)] public bool ET_IsUp => _etCalc != null ? _etCalc.IsUptrend : false;
+        [Browsable(false)] public double DT_Signal => _dtCalc != null ? _dtCalc.PrevSignal : 0;
         [Browsable(false)] public bool DT_IsUp => DT_Signal > 0;
         [Browsable(false)] public bool DT_IsDown => DT_Signal < 0;
-        [Browsable(false)] public bool SW_IsUp => solarWaveEquivalent?.IsUptrend ?? false;
-        [Browsable(false)] public int SW_Count => solarWaveEquivalent?.CountWave ?? 0;
-        [Browsable(false)] public bool T3P_IsUp => t3ProEquivalent?.IsUptrend ?? false;
-        [Browsable(false)] public bool AAA_IsUp => aaaTrendSyncEquivalent?.IsUptrend ?? false;
-        [Browsable(false)] public bool AAA_Available => true;
-        [Browsable(false)] public bool SB_IsUp => aiqSuperBandsEquivalent?.IsUptrend ?? false;
-        [Browsable(false)] public bool SB_Available => true;   
+        [Browsable(false)] public bool SW_IsUp => _swCalc != null ? _swCalc.IsUptrend : false;
+        [Browsable(false)] public int SW_Count => _swCalc != null ? _swCalc.CountWave : 0;
+        [Browsable(false)] public bool T3P_IsUp => _t3Calc != null ? _t3Calc.IsUptrend : false;
+        [Browsable(false)] public bool AAA_IsUp => _aaaCalc != null ? _aaaCalc.IsUptrend : false;
+        [Browsable(false)] public bool AAA_Available => _aaaCalc != null;
+        [Browsable(false)] public bool SB_IsUp => _sbCalc != null ? _sbCalc.IsUptrend : false;
+        [Browsable(false)] public bool SB_Available => _sbCalc != null;
         // AIQ_1 trigger indicator - HOSTED ONLY
-        [Browsable(false)] public bool AIQ1_IsUp 
-        {
-            get 
-            {
-                return aiq1Equivalent?.IsUptrend ?? false;
-            }
-        }
+        [Browsable(false)] public bool AIQ1_IsUp => _aiq1Calc != null ? _aiq1Calc.IsUptrend : false;
 
-        // ── Hosted indicator factory methods ──────────────────────────────────────
-        // These replicate the NT8 generated factory pattern inside the NHTS partial
-        // class so CacheIndicator<T> (inherited from NinjaScriptBase) is in scope.
 
-        private T3ProEquivalent[] _cacheT3Pro;
-        private T3ProEquivalent T3ProEquivalent(
-            T3ProMAType mAType, int period, int tCount, double vFactor,
-            bool chaosSmoothingEnabled, T3ProMAType chaosSmoothingMethod, int chaosSmoothingPeriod,
-            bool filterEnabled, double filterMultiplier, int filterATRPeriod,
-            bool plotEnabled, bool markerEnabled,
-            string markerStringUptrend, string markerStringDowntrend, int markerOffset)
-        {
-            var _ind = new T3ProEquivalent {
-                    MAType = mAType, Period = period, TCount = tCount, VFactor = vFactor,
-                    ChaosSmoothingEnabled = chaosSmoothingEnabled,
-                    ChaosSmoothingMethod = chaosSmoothingMethod,
-                    ChaosSmoothingPeriod = chaosSmoothingPeriod,
-                    FilterEnabled = filterEnabled, FilterMultiplier = filterMultiplier,
-                    FilterATRPeriod = filterATRPeriod, PlotEnabled = plotEnabled,
-                    MarkerEnabled = markerEnabled,
-                    MarkerStringUptrend = markerStringUptrend,
-                    MarkerStringDowntrend = markerStringDowntrend,
-                    MarkerOffset = markerOffset
-            };
-
-            return _ind;
-        }
-
-        private VIDYAProEquivalent[] _cacheVIDYA;
-        private VIDYAProEquivalent VIDYAProEquivalent(
-            int period, int volatilityPeriod, bool smoothingEnabled,
-            VIDYAProMAType smoothingMethod, int smoothingPeriod,
-            bool filterEnabled, double filterMultiplier, int aTRPeriod,
-            bool showPlot, bool showMarkers,
-            string uptrendMarker, string downtrendMarker, int markerOffset)
-        {
-            var _ind = new VIDYAProEquivalent {
-                    Period = period, VolatilityPeriod = volatilityPeriod,
-                    SmoothingEnabled = smoothingEnabled, SmoothingMethod = smoothingMethod,
-                    SmoothingPeriod = smoothingPeriod, FilterEnabled = filterEnabled,
-                    FilterMultiplier = filterMultiplier, ATRPeriod = aTRPeriod,
-                    ShowPlot = showPlot, ShowMarkers = showMarkers,
-                    UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker,
-                    MarkerOffset = markerOffset
-            };
-
-            return _ind;
-        }
-
-        private EasyTrendEquivalent[] _cacheEasyTrend;
-        private EasyTrendEquivalent EasyTrendEquivalent(
-            EasyTrendMAType mAType, int period, bool smoothingEnabled,
-            EasyTrendMAType smoothingMethod, int smoothingPeriod,
-            bool filterEnabled, bool filterAfterSmoothing, double filterMultiplier,
-            EasyTrendFilterUnit filterUnit, int filterATRPeriod,
-            bool showPlot, bool showMarkers,
-            string uptrendMarker, string downtrendMarker, int markerOffset)
-        {
-            var _ind = new EasyTrendEquivalent {
-                    MAType = mAType, Period = period, SmoothingEnabled = smoothingEnabled,
-                    SmoothingMethod = smoothingMethod, SmoothingPeriod = smoothingPeriod,
-                    FilterEnabled = filterEnabled, FilterAfterSmoothing = filterAfterSmoothing,
-                    FilterMultiplier = filterMultiplier, FilterUnit = filterUnit,
-                    FilterATRPeriod = filterATRPeriod, ShowPlot = showPlot,
-                    ShowMarkers = showMarkers, UptrendMarker = uptrendMarker,
-                    DowntrendMarker = downtrendMarker, MarkerOffset = markerOffset
-            };
-
-            return _ind;
-        }
-
-        private RubyRiverEquivalent[] _cacheRubyRiver;
-        private RubyRiverEquivalent RubyRiverEquivalent(
-            RubyRiverMAType mAType, int mAPeriod, bool mASmoothingEnabled,
-            RubyRiverMAType mASmoothingMethod, int mASmoothingPeriod,
-            double offsetMultiplier, int offsetPeriod,
-            bool showPlot, bool showMarkers,
-            string uptrendMarker, string downtrendMarker, int markerOffset)
-        {
-            var _ind = new RubyRiverEquivalent {
-                    MAType = mAType, MAPeriod = mAPeriod,
-                    MASmoothingEnabled = mASmoothingEnabled,
-                    MASmoothingMethod = mASmoothingMethod,
-                    MASmoothingPeriod = mASmoothingPeriod,
-                    OffsetMultiplier = offsetMultiplier, OffsetPeriod = offsetPeriod,
-                    ShowPlot = showPlot, ShowMarkers = showMarkers,
-                    UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker,
-                    MarkerOffset = markerOffset
-            };
-
-            return _ind;
-        }
-
-        private DragonTrendEquivalent[] _cacheDragonTrend;
-        private DragonTrendEquivalent DragonTrendEquivalent(
-            int period, bool smoothingEnabled,
-            DragonTrendMAType smoothingMethod, int smoothingPeriod,
-            bool showMarkers, string uptrendMarker, string downtrendMarker, int markerOffset)
-        {
-            var _ind = new DragonTrendEquivalent {
-                    Period = period, SmoothingEnabled = smoothingEnabled,
-                    SmoothingMethod = smoothingMethod, SmoothingPeriod = smoothingPeriod,
-                    ShowMarkers = showMarkers, UptrendMarker = uptrendMarker,
-                    DowntrendMarker = downtrendMarker, MarkerOffset = markerOffset
-            };
-
-            return _ind;
-        }
-
-        private SolarWaveEquivalent[] _cacheSolarWave;
-        private SolarWaveEquivalent SolarWaveEquivalent(
-            int offsetATRPeriod, double offsetMultiplierTrend, double offsetMultiplierStop,
-            int referencePricePeriod, int referencePriceCloseWeight,
-            int slowdownScan, int weakWeakSplit, int pullbackSplit,
-            bool showTrailingStop, bool showMarkers,
-            string uptrendMarker, string downtrendMarker, int markerOffset)
-        {
-            var _ind = new SolarWaveEquivalent {
-                    OffsetATRPeriod = offsetATRPeriod,
-                    OffsetMultiplierTrend = offsetMultiplierTrend,
-                    OffsetMultiplierStop = offsetMultiplierStop,
-                    ReferencePricePeriod = referencePricePeriod,
-                    ReferencePriceCloseWeight = referencePriceCloseWeight,
-                    SlowdownScan = slowdownScan, WeakWeakSplit = weakWeakSplit,
-                    PullbackSplit = pullbackSplit, ShowTrailingStop = showTrailingStop,
-                    ShowMarkers = showMarkers, UptrendMarker = uptrendMarker,
-                    DowntrendMarker = downtrendMarker, MarkerOffset = markerOffset
-            };
-
-            return _ind;
-        }
-
-        private AIQ_1Equivalent[] _cacheAIQ1;
-        private AIQ_1Equivalent AIQ_1Equivalent(
-            int period, int phase, AIQ1EquivMAMethod method,
-            bool useBetterFormula, double pctAbove, double pctBelow,
-            double sPctAbove, double sPctBelow,
-            bool showSquares, int squareSize, int squareOpacity,
-            bool showDots, int dotSize,
-            Brush upSquareColor, Brush downSquareColor)
-        {
-            var _ind = new AIQ_1Equivalent {
-                    Period = period, Phase = phase, Method = method,
-                    UseBetterFormula = useBetterFormula,
-                    PctAbove = pctAbove, PctBelow = pctBelow,
-                    SPctAbove = sPctAbove, SPctBelow = sPctBelow,
-                    ShowSquares = showSquares, SquareSize = squareSize,
-                    SquareOpacity = squareOpacity, ShowDots = showDots,
-                    DotSize = dotSize, UpSquareColor = upSquareColor,
-                    DownSquareColor = downSquareColor
-            };
-
-            return _ind;
-        }
-        private AAATrendSyncEquivalent[] _cacheAAATrendSync;
-        private AAATrendSyncEquivalent AAATrendSyncEquivalent(
-            int fastPeriod, bool fastSmoothingEnabled, int fastSmoothingPeriod,
-            int midPeriod, bool midSmoothingEnabled, int midSmoothingPeriod,
-            int slowPeriod, bool slowSmoothingEnabled, int slowSmoothingPeriod,
-            bool minSpreadEnabled, double minSpreadATRMultiplier, int minSpreadATRPeriod,
-            bool showMarkers, int markerOffset,
-            string uptrendMarker, string downtrendMarker)
-        {
-            var _ind = new AAATrendSyncEquivalent {
-                FastPeriod = fastPeriod, FastSmoothingEnabled = fastSmoothingEnabled,
-                FastSmoothingPeriod = fastSmoothingPeriod,
-                MidPeriod = midPeriod, MidSmoothingEnabled = midSmoothingEnabled,
-                MidSmoothingPeriod = midSmoothingPeriod,
-                SlowPeriod = slowPeriod, SlowSmoothingEnabled = slowSmoothingEnabled,
-                SlowSmoothingPeriod = slowSmoothingPeriod,
-                MinSpreadEnabled = minSpreadEnabled,
-                MinSpreadATRMultiplier = minSpreadATRMultiplier,
-                MinSpreadATRPeriod = minSpreadATRPeriod,
-                ShowMarkers = showMarkers, MarkerOffset = markerOffset,
-                UptrendMarker = uptrendMarker, DowntrendMarker = downtrendMarker
-            };
-            return _ind;
-        }
-
-        private AIQ_SuperBandsEquivalent[] _cacheAIQSuperBands;
-        private AIQ_SuperBandsEquivalent AIQ_SuperBandsEquivalent(
-            int halfLengthMain, double bandsDeviationMain,
-            int halfLengthFast, double bandsDeviationFast,
-            bool staticBands, bool optimizeMainDeviation, int maxOutOfBandPercent,
-            double pctAbove, double pctBelow,
-            bool enableMainBands, bool enableFastBands,
-            bool enableTriangles, bool enableLines)
-        {
-            var _ind = new AIQ_SuperBandsEquivalent {
-                HalfLength_Main = halfLengthMain, BandsDeviation_Main = bandsDeviationMain,
-                HalfLength_Fast = halfLengthFast, BandsDeviation_Fast = bandsDeviationFast,
-                StaticBands = staticBands, OptimizeMainDeviation = optimizeMainDeviation,
-                MaxOutOfBandPercent = maxOutOfBandPercent,
-                PctAbove = pctAbove, PctBelow = pctBelow,
-                EnableMainBands = enableMainBands, EnableFastBands = enableFastBands,
-                EnableTriangles = enableTriangles, EnableLines = enableLines
-            };
-            return _ind;
-        }
         #endregion
     }
 }
-

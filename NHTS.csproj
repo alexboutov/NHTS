@@ -83,15 +83,7 @@
     <Compile Include="Strategies\NHTS.Indicators.cs" />
     <Compile Include="Strategies\NHTS.Panel.cs" />
     <Compile Include="Strategies\NHTS.Signals.cs" />
-    <Compile Include="Indicators\AAATrendSyncEquivalent.cs" />
-    <Compile Include="Indicators\AIQ_1Equivalent.cs" />
-    <Compile Include="Indicators\AIQ_SuperBandsEquivalent.cs" />
-    <Compile Include="Indicators\DragonTrendEquivalent.cs" />
-    <Compile Include="Indicators\EasyTrendEquivalent.cs" />
-    <Compile Include="Indicators\RubyRiverEquivalent.cs" />
-    <Compile Include="Indicators\SolarWaveEquivalent.cs" />
-    <Compile Include="Indicators\T3ProEquivalent.cs" />
-    <Compile Include="Indicators\VIDYAProEquivalent.cs" />
+    <Compile Include="Strategies\NHTS.HostedIndicators.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
