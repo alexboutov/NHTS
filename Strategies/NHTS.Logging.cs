@@ -73,8 +73,8 @@ namespace NinjaTrader.NinjaScript.Strategies
             string et = easyTrend != null ? "N" : (useChartET ? "C" : "H");
             string sw = solarWave != null ? "N" : (useChartSW ? "C" : "H");
             string t3 = ninZaT3Pro != null ? "N" : (useChartT3P ? "C" : "H");
-            string aaa = aaaTrendSync != null ? "N" : (useChartAAA ? "C" : "-");
-            string sb = useNativeAiqSB ? "N" : (useChartSB ? "C" : "-");
+            string aaa = aaaTrendSync != null ? "N" : (useChartAAA ? "C" : "H");
+            string sb = useNativeAiqSB ? "N" : (useChartSB ? "C" : "H");
             return $"AIQ:{aiq}|RR:{rr}|DT:{dt}|VY:{vy}|ET:{et}|SW:{sw}|T3:{t3}|AAA:{aaa}|SB:{sb}";
         }
         
