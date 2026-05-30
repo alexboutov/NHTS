@@ -93,11 +93,39 @@ or logic change can be judged objectively.
   (Dec 15 2025 / Mar 16 2026 / Jun 15 2026); switch here if preferred.
   Each window uses the contract that was the liquid front month during it.
 
-3.4 Overfitting Guard (mandatory)
-* The two windows form a train/test split. Any change tuned to improve PnL on
-  one window MUST be re-evaluated on the other (held-out) window before it is
-  accepted. A change that wins on the tuning window but not on the held-out
-  window is rejected as curve-fitting.
+3.4 Overfitting Guard & Robustness Protocol (mandatory)
+The objective of this protocol is to BREAK a candidate configuration, not to
+confirm it. A result that survives all tests below is treated as the real edge;
+an impressive number that has not yet been attacked is treated as unproven.
+
+  (a) Out-of-sample (train/test): the two windows (3.3) form a train/test split.
+      A config tuned on one window MUST be re-run, parameters LOCKED (single
+      Backtest run, not Optimization), on the other held-out window. A config
+      that wins in-sample but not out-of-sample is rejected as curve-fitting.
+  (b) Parameter plateau: a genuine edge sits on a plateau, not a lonely spike.
+      Re-run the winning config with each key parameter nudged slightly
+      (e.g. SL +/- one step, TP +/- one step, confluence threshold +/- 1).
+      Profit must degrade gracefully, not collapse. A cliff = overfit.
+  (c) Slippage stress: re-run at increasing slippage (e.g. 5, 8, 10 ticks).
+      A config profitable only at low slippage is fragile.
+  (d) Fill-resolution stress: re-run with Order Fill Resolution = High (stricter
+      intrabar fills) instead of Standard (Fastest). Material profit loss means
+      part of the result was optimistic fill assumptions, not edge.
+  (e) Bar-construction sensitivity (UniRenko): because optimizing the bar
+      parameters (Open Offset / Tick Reversal) fits the bars themselves to the
+      data, re-run the winning strategy params on standard / un-optimized
+      UniRenko settings. Heavy dependence on the exact bar parameters is the
+      most fragile failure mode and is flagged accordingly.
+  (f) Regime test (lower priority): once (a)-(e) pass, validate on a different
+      instrument or an earlier date range. Surviving a regime change is the
+      strongest robustness evidence.
+
+  Backtest realism (apply to ALL robustness runs so numbers are trustworthy):
+  * Commission: use a realistic per-contract round-turn (e.g. ~$4-5 for
+    Apex/Rithmic). A $0 or "free" template understates costs; at high trade
+    counts this is material. Verify the selected commission template's actual
+    per-contract charge.
+  * Slippage: minimum 1 tick (NQ) for the baseline run; stress higher per (c).
 
 3.5 Secondary / Guardrail Metrics (reported alongside PnL; prevent fragile
     "wins")
@@ -111,6 +139,17 @@ or logic change can be judged objectively.
   present on the test machine(s). (Alex maintains/copies these as needed.)
 * The same .nrd files must be used for both NHTS and the ActiveNikiTrader
   baseline so the comparison is on identical bars.
+
+3.7 Account-Size Modeling (deferred decision)
+* NT8's Strategy Analyzer has NO account-size setting; it simulates an
+  effectively unlimited account and reports raw cumulative PnL. Net-profit and
+  drawdown figures are therefore capital-independent (valid for ranking configs)
+  but do NOT model margin rejection or equity-based position sizing.
+* DEFERRED DECISION: whether to model a $5,000 account with a daily margin
+  limitation requirement (capital-constrained sizing / trade rejection when
+  margin is insufficient). If adopted, this must be coded INTO the strategy
+  (track an account-value variable, size/gate entries off it) since NT8 offers
+  no built-in setting. Tracked as a milestone step under M_perf and an Open Item.
 
 
 ==============================================================================
@@ -387,12 +426,18 @@ V3 — NT8 AddOn ecosystem: full AddOn distribution with NinjaTrader ecosystem
 
   M_perf  Performance  NEW. Establish that NHTS outperforms the ActiveNikiTrader
       Validation       baseline on NQ over the benchmark window (Section 3),
-      [PRIMARY GOAL]   including the train/test (two-window) overfitting guard.
-                       Drop/fix VY, fix SW_Count, and tune the roster/threshold
-                       using benchmark PnL.
-                       GATE: NHTS net PnL > ActiveNikiTrader on both windows
-                       (tuned on one, confirmed on the held-out other) AND
-                       guardrail metrics acceptable.
+      [PRIMARY GOAL]   including the full robustness protocol (3.4 a-f) and
+                       realistic commission/slippage. Drop/fix VY, fix SW_Count,
+                       and tune the roster/threshold using benchmark PnL.
+                       Includes step: "decision to model a $5,000 account with
+                       daily margin limitation requirement" (per 3.7) — decide
+                       whether to implement capital-constrained sizing before
+                       finalizing the performance claim.
+                       GATE: NHTS net PnL > ActiveNikiTrader on the out-of-sample
+                       (held-out) window with parameters LOCKED, survives the
+                       robustness protocol (plateau, slippage, fill-resolution,
+                       bar-construction sensitivity), AND guardrail metrics
+                       acceptable.
 
   M1  NQ Strategy      NHTS strategy + *Calc indicators + NQ templates packaged
       Bundle           as .ntsz. Panel, confluence selector, audio alerts,
@@ -472,6 +517,11 @@ V3 — NT8 AddOn ecosystem: full AddOn distribution with NinjaTrader ecosystem
   Trigger choice                    : AIQ1 by default; benchmark may justify
                                       replacing/removing it (entails entry-logic
                                       rework). (M_perf)
+  $5,000 account modeling           : Decide whether to model a $5,000 account
+                                      with a daily margin limitation requirement
+                                      (capital-constrained sizing). Requires
+                                      in-strategy code; NT8 has no setting.
+                                      (3.7, M_perf)
   Secondary baseline floor          : Confirm whether NHTS must be net-positive
                                       in addition to beating ActiveNikiTrader.
   Minimum confluence threshold      : Set by benchmark, not by matching. (M_perf)
@@ -503,5 +553,13 @@ REVISION HISTORY
                  M_perf inserted ahead of CL/GC, license, and AddOn. Out-of-scope
                  strengthened to state ActiveNikiTrader is a benchmark to beat,
                  not a fidelity target.
+  0.3a May 2026  Expanded 3.4 into a full Robustness Protocol (out-of-sample,
+                 parameter plateau, slippage stress, fill-resolution stress,
+                 UniRenko bar-construction sensitivity, regime test) plus
+                 backtest-realism requirements (commission, slippage). Added 3.7
+                 Account-Size Modeling (NT8 has no account-size setting; raw PnL
+                 is capital-independent) and recorded the deferred decision to
+                 model a $5,000 account with a daily margin limitation as a step
+                 under M_perf and an Open Item.
 
 NHTS PRD — Confidential
