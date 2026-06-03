@@ -1,4 +1,4 @@
-﻿#region Using declarations
+#region Using declarations
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -69,6 +69,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         // Panel UI elements
         private Grid controlPanel;
         private bool panelActive;
+        private bool isArmed = false;  // Parameter-confirmation gate: false until trader clicks Confirm. Always false at load.
         private bool isDragging;
         private bool isResizing;
         private Point dragStartPoint;
@@ -462,7 +463,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 EODCloseHour = 15;
                 EODCloseMinute = 58;
                 
-                // Indicator selection - all 7 enabled by default
+                // Indicator selection - all 8 enabled by default
                 UseRubyRiver = true;
                 UseDragonTrend = true;
                 UseSolarWave = true;
@@ -553,8 +554,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                 chartSessionId = DateTime.Now.ToString("HHmmss") + "_" + new Random().Next(1000, 9999);
                 InitializeLogFile();
                 InitializeCSVLog();
+                LoadConfirmedParams();
                 
-                LogAlways($"ANT | 7-indicator confluence | Signal\u2265{MinConfluenceRequired} Trade\u2265{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
+                LogAlways($"ANT | 8-indicator confluence | Signal\u2265{MinConfluenceRequired} Trade\u2265{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
                 if (StopLossBufferTicks > 0)
                     LogAlways($"SL Buffer: {StopLossBufferTicks} ticks");
                 if (EnableDynamicExit)
@@ -976,7 +978,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("LONG", "YellowSquare+" + confirmingIndicator, barTime, bull, total);
                         UpdateSignalDisplay("YellowSquare+" + confirmingIndicator, bull, total, barTime, true);
 
-                        if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && confirmingIndicator != "RR" && confirmingIndicator != "DT")
+                        if (isArmed && EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && confirmingIndicator != "RR" && confirmingIndicator != "DT")
                         {
                             if (bull >= MinConfluenceForAutoTrade)
                             {
@@ -1050,7 +1052,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                         LogSignal("SHORT", "OrangeSquare+" + confirmingIndicator, barTime, bear, total);
                         UpdateSignalDisplay("OrangeSquare+" + confirmingIndicator, bear, total, barTime, false);
                         
-                        if (EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && RR_IsUp)
+                        if (isArmed && EnableAutoTrading && Position.MarketPosition == MarketPosition.Flat && RR_IsUp)
                         {
                             if (bear >= MinConfluenceForAutoTrade)
                             {

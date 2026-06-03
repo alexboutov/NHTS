@@ -1,4 +1,4 @@
-﻿#region Using declarations
+#region Using declarations
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -49,6 +49,19 @@ namespace NinjaTrader.NinjaScript.Strategies
         private Point resizeStartMousePos;
         private double resizeStartLeft, resizeStartTop;
         private TextBlock lblAIQ1Name;  // Dynamic trigger label
+
+        // Parameter-confirmation gate UI
+        private StackPanel confirmView;   // shown until armed
+        private StackPanel tradingView;   // shown after armed
+        private TextBox txtTP, txtSL, txtS1Start, txtS1End, txtS2Start, txtS2End;
+        private CheckBox chkAutoTrade;
+        private TextBlock lblConfirmError;
+        private string confirmedParamsFile;
+
+        // Host-window key interception (stops NT8 chart from hijacking keystrokes
+        // while a confirm field is focused).
+        private Window hostWindow;
+        private KeyEventHandler hostKeyHandler;
         #endregion
 
         #region Chart Panel
@@ -88,54 +101,64 @@ namespace NinjaTrader.NinjaScript.Strategies
                     Padding = new Thickness(8)
                 };
                 
-                var stack = new StackPanel();
-                stack.Children.Add(new TextBlock { Text = "ANTrading", FontWeight = FontWeights.Bold, Foreground = Brushes.Cyan, FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 2) });
+                var rootStack = new StackPanel();
+
+                // Header - ALWAYS visible (armed and unarmed)
+                rootStack.Children.Add(new TextBlock { Text = "ANTrading", FontWeight = FontWeights.Bold, Foreground = Brushes.Cyan, FontSize = 11, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 2) });
+
+                // Confirm view - shown until the trader clicks Confirm
+                confirmView = BuildConfirmView();
+                rootStack.Children.Add(confirmView);
+
+                // Trading view - everything that was previously in the panel
+                tradingView = new StackPanel();
+
                 lblSubtitle = new TextBlock { Foreground = Brushes.LightGray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,0,0,6) };
-                stack.Children.Add(lblSubtitle);
+                tradingView.Children.Add(lblSubtitle);
                 
-                stack.Children.Add(new TextBlock { Text = "â”€â”€ Confluence (8) â”€â”€", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
+                tradingView.Children.Add(new TextBlock { Text = "?????? Confluence (8) ??????", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
                 
                 // Indicators in alphabetical order
-                stack.Children.Add(CreateRow("AAA TrendSync", ref chkAAASync, ref lblAAASync, UseAAATrendSync));
-                stack.Children.Add(CreateRow("AIQ SuperBands", ref chkSuperBands, ref lblSuperBands, UseAIQSuperBands));
-                stack.Children.Add(CreateRow("Dragon Trend", ref chkDragonTrend, ref lblDragonTrend, UseDragonTrend));
-                stack.Children.Add(CreateRow("Easy Trend", ref chkEasyTrend, ref lblEasyTrend, UseEasyTrend));
-                stack.Children.Add(CreateRow("Ruby River", ref chkRubyRiver, ref lblRubyRiver, UseRubyRiver));
-                stack.Children.Add(CreateRow("Solar Wave", ref chkSolarWave, ref lblSolarWave, UseSolarWave));
-                stack.Children.Add(CreateRow("T3 Pro", ref chkT3Pro, ref lblT3Pro, UseT3Pro));
-                stack.Children.Add(CreateRow("VIDYA Pro", ref chkVIDYA, ref lblVIDYA, UseVIDYAPro));
+                tradingView.Children.Add(CreateRow("AAA TrendSync", ref chkAAASync, ref lblAAASync, UseAAATrendSync));
+                tradingView.Children.Add(CreateRow("AIQ SuperBands", ref chkSuperBands, ref lblSuperBands, UseAIQSuperBands));
+                tradingView.Children.Add(CreateRow("Dragon Trend", ref chkDragonTrend, ref lblDragonTrend, UseDragonTrend));
+                tradingView.Children.Add(CreateRow("Easy Trend", ref chkEasyTrend, ref lblEasyTrend, UseEasyTrend));
+                tradingView.Children.Add(CreateRow("Ruby River", ref chkRubyRiver, ref lblRubyRiver, UseRubyRiver));
+                tradingView.Children.Add(CreateRow("Solar Wave", ref chkSolarWave, ref lblSolarWave, UseSolarWave));
+                tradingView.Children.Add(CreateRow("T3 Pro", ref chkT3Pro, ref lblT3Pro, UseT3Pro));
+                tradingView.Children.Add(CreateRow("VIDYA Pro", ref chkVIDYA, ref lblVIDYA, UseVIDYAPro));
                 
-                stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
-                stack.Children.Add(new TextBlock { Text = "â”€â”€ Trigger â”€â”€", Foreground = Brushes.Orange, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
+                tradingView.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
+                tradingView.Children.Add(new TextBlock { Text = "?????? Trigger ??????", Foreground = Brushes.Orange, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
                 
                 var aiqRow = new Grid { Margin = new Thickness(0, 1, 0, 1) };
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
-                lblAIQ1Name = new TextBlock { Text = "AIQ_1 (Yellow â– )", Foreground = Brushes.Yellow, FontSize = 9, VerticalAlignment = VerticalAlignment.Center };
+                lblAIQ1Name = new TextBlock { Text = "AIQ_1 (Yellow ???)", Foreground = Brushes.Yellow, FontSize = 9, VerticalAlignment = VerticalAlignment.Center };
                 Grid.SetColumn(lblAIQ1Name, 0); aiqRow.Children.Add(lblAIQ1Name);
                 lblAIQ1Status = new TextBlock { Text = "---", Foreground = Brushes.Gray, FontSize = 9, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Right };
                 Grid.SetColumn(lblAIQ1Status, 1); aiqRow.Children.Add(lblAIQ1Status);
-                stack.Children.Add(aiqRow);
+                tradingView.Children.Add(aiqRow);
                 
                 lblWindowStatus = new TextBlock { Text = "Window: CLOSED", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) };
-                stack.Children.Add(lblWindowStatus);
+                tradingView.Children.Add(lblWindowStatus);
                 
-                stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
+                tradingView.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
 
-                lblTriggerMode = new TextBlock { Text = $"Signalâ‰¥{MinConfluenceRequired} Tradeâ‰¥{MinConfluenceForAutoTrade} CD={CooldownBars}", Foreground = Brushes.LightGray, FontSize = 9 };
-                lblTradeStatus = new TextBlock { Text = EnableAutoTrading ? "âš¡ AUTO TRADING ON" : "Mode: Signal Only", Foreground = EnableAutoTrading ? Brushes.Lime : Brushes.Cyan, FontWeight = FontWeights.Bold, FontSize = 10, Margin = new Thickness(0,2,0,2) };
+                lblTriggerMode = new TextBlock { Text = $"Signal???{MinConfluenceRequired} Trade???{MinConfluenceForAutoTrade} CD={CooldownBars}", Foreground = Brushes.LightGray, FontSize = 9 };
+                lblTradeStatus = new TextBlock { Text = EnableAutoTrading ? "??? AUTO TRADING ON" : "Mode: Signal Only", Foreground = EnableAutoTrading ? Brushes.Lime : Brushes.Cyan, FontWeight = FontWeights.Bold, FontSize = 10, Margin = new Thickness(0,2,0,2) };
                 lblSessionStats = new TextBlock { Text = "Signals: 0", Foreground = Brushes.LightGray, FontSize = 9 };
 
-                stack.Children.Add(lblTriggerMode);
-                stack.Children.Add(lblTradeStatus);
-                stack.Children.Add(lblSessionStats);
+                tradingView.Children.Add(lblTriggerMode);
+                tradingView.Children.Add(lblTradeStatus);
+                tradingView.Children.Add(lblSessionStats);
                 
-                stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
+                tradingView.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
                 
                 signalBorder = new Border { BorderBrush = Brushes.Transparent, BorderThickness = new Thickness(2), CornerRadius = new CornerRadius(3), Padding = new Thickness(4) };
-                lblLastSignal = new TextBlock { Text = "Waiting for Yellow â– ...", Foreground = Brushes.Gray, FontSize = 9, TextWrapping = TextWrapping.Wrap };
+                lblLastSignal = new TextBlock { Text = "Waiting for Yellow ???...", Foreground = Brushes.Gray, FontSize = 9, TextWrapping = TextWrapping.Wrap };
                 signalBorder.Child = lblLastSignal;
-                stack.Children.Add(signalBorder);
+                tradingView.Children.Add(signalBorder);
                 
                 // Add resize grip indicator in bottom-right corner
                 var resizeIndicator = new Canvas { Width = 12, Height = 12, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 4, 0, 0) };
@@ -144,19 +167,338 @@ namespace NinjaTrader.NinjaScript.Strategies
                     var line = new Line { X1 = 10 - i * 4, Y1 = 10, X2 = 10, Y2 = 10 - i * 4, Stroke = new SolidColorBrush(Color.FromRgb(120, 120, 140)), StrokeThickness = 1 };
                     resizeIndicator.Children.Add(line);
                 }
-                stack.Children.Add(resizeIndicator);
-                
-                border.Child = stack;
+                tradingView.Children.Add(resizeIndicator);
+
+                rootStack.Children.Add(tradingView);
+
+                // isArmed is always false at load, so confirmView shows and tradingView hides
+                confirmView.Visibility = isArmed ? Visibility.Collapsed : Visibility.Visible;
+                tradingView.Visibility = isArmed ? Visibility.Visible : Visibility.Collapsed;
+
+                border.Child = rootStack;
                 controlPanel.Children.Add(border);
 
                 UIElementCollection panelHolder = (ChartControl.Parent as Grid)?.Children;
                 if (panelHolder != null) panelHolder.Add(controlPanel);
                 panelActive = true;
+
+                // Intercept keystrokes at the host window so the chart cannot hijack
+                // typing into the confirm fields. Registered with handledEventsToo so
+                // it still runs even if something downstream marks the event handled.
+                hostWindow = Window.GetWindow(controlPanel) ?? Window.GetWindow(ChartControl);
+                if (hostWindow != null)
+                {
+                    hostKeyHandler = new KeyEventHandler(Host_PreviewKeyDown);
+                    hostWindow.AddHandler(UIElement.PreviewKeyDownEvent, hostKeyHandler, true);
+                }
                 
                 // Apply initial position
                 ApplyPanelConstraints();
             }
             catch (Exception ex) { Print($"Panel error: {ex.Message}"); }
+        }
+
+        private StackPanel BuildConfirmView()
+        {
+            var v = new StackPanel();
+
+            v.Children.Add(new TextBlock { Text = "Confirm parameters", Foreground = Brushes.LightGray, FontSize = 9, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,0,0,6) });
+
+            v.Children.Add(BuildParamRow("Take Profit $", ref txtTP, TakeProfitUSD.ToString("F0")));
+            v.Children.Add(BuildParamRow("Stop Loss $", ref txtSL, StopLossUSD.ToString("F0")));
+
+            v.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
+            v.Children.Add(new TextBlock { Text = "Session 1", Foreground = Brushes.Orange, FontSize = 9, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,0,0,2) });
+            v.Children.Add(BuildParamRow("Start", ref txtS1Start, $"{Session1StartHour:D2}:{Session1StartMinute:D2}"));
+            v.Children.Add(BuildParamRow("End", ref txtS1End, $"{Session1EndHour:D2}:{Session1EndMinute:D2}"));
+
+            v.Children.Add(new TextBlock { Text = "Session 2", Foreground = Brushes.Orange, FontSize = 9, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,4,0,2) });
+            v.Children.Add(BuildParamRow("Start", ref txtS2Start, $"{Session2StartHour:D2}:{Session2StartMinute:D2}"));
+            v.Children.Add(BuildParamRow("End", ref txtS2End, $"{Session2EndHour:D2}:{Session2EndMinute:D2}"));
+
+            // Normalize the four time fields to zero-padded HH:MM whenever they lose
+            // focus (Tab away, click another field, click Confirm). Valid entries snap
+            // to HH:MM; invalid entries are left alone for ValidateAndApply to flag.
+            txtS1Start.LostKeyboardFocus += NormalizeTimeField;
+            txtS1End.LostKeyboardFocus   += NormalizeTimeField;
+            txtS2Start.LostKeyboardFocus += NormalizeTimeField;
+            txtS2End.LostKeyboardFocus   += NormalizeTimeField;
+
+            v.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
+
+            var atRow = new Grid { Margin = new Thickness(0,1,0,1) };
+            atRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            atRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            var atLbl = new TextBlock { Text = "Auto-Trading", Foreground = Brushes.White, FontSize = 11, VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetColumn(atLbl, 0); atRow.Children.Add(atLbl);
+            chkAutoTrade = new CheckBox { IsChecked = EnableAutoTrading, VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetColumn(chkAutoTrade, 1); atRow.Children.Add(chkAutoTrade);
+            v.Children.Add(atRow);
+
+            lblConfirmError = new TextBlock { Text = "", Foreground = Brushes.Red, FontSize = 9, TextWrapping = TextWrapping.Wrap, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,4,0,0) };
+            v.Children.Add(lblConfirmError);
+
+            var btn = new Button { Content = "CONFIRM", FontSize = 11, FontWeight = FontWeights.Bold, Margin = new Thickness(0,8,0,0), Padding = new Thickness(0,4,0,4), Background = new SolidColorBrush(Color.FromRgb(20,80,20)), Foreground = Brushes.White, BorderBrush = new SolidColorBrush(Color.FromRgb(42,138,42)) };
+            btn.Click += OnConfirmClick;
+            v.Children.Add(btn);
+
+            return v;
+        }
+
+        private Grid BuildParamRow(string label, ref TextBox box, string initial)
+        {
+            var row = new Grid { Margin = new Thickness(0,2,0,2) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(62) });
+
+            var lbl = new TextBlock { Text = label, Foreground = Brushes.White, FontSize = 11, VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetColumn(lbl, 0); row.Children.Add(lbl);
+
+            box = new TextBox
+            {
+                Text = initial,
+                FontSize = 11,
+                Background = new SolidColorBrush(Color.FromRgb(45,45,58)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(90,90,110)),
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Right
+            };
+            box.PreviewMouseLeftButtonDown += TextBox_PreviewMouseLeftButtonDown;
+            box.GotKeyboardFocus += (s, e) => { (s as TextBox)?.SelectAll(); };
+            Grid.SetColumn(box, 1); row.Children.Add(box);
+            return row;
+        }
+
+        // Snap a valid time field to zero-padded HH:MM when it loses focus.
+        private void NormalizeTimeField(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null) return;
+            if (TryParseHHMM(tb.Text, out int hh, out int mm))
+                tb.Text = $"{hh:D2}:{mm:D2}";
+        }
+
+        // Forces keyboard focus into a chart-hosted TextBox on first click and
+        // stops that click from starting a panel drag.
+        private void TextBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb != null && !tb.IsKeyboardFocusWithin)
+            {
+                tb.Focus();
+                Keyboard.Focus(tb);
+                e.Handled = true;
+            }
+        }
+
+        private bool IsConfirmBox(TextBox tb)
+        {
+            return tb == txtTP || tb == txtSL || tb == txtS1Start || tb == txtS1End || tb == txtS2Start || tb == txtS2End;
+        }
+
+        // While a confirm field is focused, fully own the keystroke: edit the
+        // TextBox text ourselves and mark the event handled so NT8's chart never
+        // sees it (otherwise the chart hijacks digits as instrument quick-search).
+        private void Host_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (isArmed) return;
+            var tb = Keyboard.FocusedElement as TextBox;
+            if (tb == null || !IsConfirmBox(tb)) return;
+
+            Key k = e.Key;
+
+            // Clipboard / select-all
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (k == Key.A) { tb.SelectAll(); e.Handled = true; return; }
+                if (k == Key.V) { try { InsertText(tb, System.Windows.Clipboard.GetText() ?? ""); } catch { } e.Handled = true; return; }
+                // Other Ctrl combos: swallow so the chart doesn't act on them
+                e.Handled = true;
+                return;
+            }
+
+            // From here we fully own the keystroke.
+            e.Handled = true;
+
+            // Digits (top row, no shift) and numpad
+            if (k >= Key.D0 && k <= Key.D9 && Keyboard.Modifiers == ModifierKeys.None)
+            { InsertText(tb, ((char)('0' + (k - Key.D0))).ToString()); return; }
+            if (k >= Key.NumPad0 && k <= Key.NumPad9)
+            { InsertText(tb, ((char)('0' + (k - Key.NumPad0))).ToString()); return; }
+
+            // Colon for HH:MM (US keyboard colon = Shift+OemSemicolon; accept the key either way)
+            if (k == Key.OemSemicolon) { InsertText(tb, ":"); return; }
+            // Period / decimal point
+            if (k == Key.OemPeriod || k == Key.Decimal) { InsertText(tb, "."); return; }
+
+            switch (k)
+            {
+                case Key.Back:   Backspace(tb); return;
+                case Key.Delete: DeleteForward(tb); return;
+                case Key.Left:   MoveCaret(tb, -1); return;
+                case Key.Right:  MoveCaret(tb, +1); return;
+                case Key.Home:   tb.SelectionStart = 0; tb.SelectionLength = 0; return;
+                case Key.End:    tb.SelectionStart = tb.Text.Length; tb.SelectionLength = 0; return;
+                case Key.Tab:    FocusNextConfirmBox(tb); return;
+                case Key.Return: OnConfirmClick(null, null); return;
+                default: return;  // swallowed no-op (blocks letters etc. from reaching the chart)
+            }
+        }
+
+        private void InsertText(TextBox tb, string s)
+        {
+            if (string.IsNullOrEmpty(s)) return;
+            int start = tb.SelectionStart;
+            int len = tb.SelectionLength;
+            string t = tb.Text.Remove(start, len).Insert(start, s);
+            tb.Text = t;
+            tb.SelectionStart = start + s.Length;
+            tb.SelectionLength = 0;
+        }
+
+        private void Backspace(TextBox tb)
+        {
+            int start = tb.SelectionStart, len = tb.SelectionLength;
+            if (len > 0) { tb.Text = tb.Text.Remove(start, len); tb.SelectionStart = start; }
+            else if (start > 0) { tb.Text = tb.Text.Remove(start - 1, 1); tb.SelectionStart = start - 1; }
+            tb.SelectionLength = 0;
+        }
+
+        private void DeleteForward(TextBox tb)
+        {
+            int start = tb.SelectionStart, len = tb.SelectionLength;
+            if (len > 0) { tb.Text = tb.Text.Remove(start, len); tb.SelectionStart = start; }
+            else if (start < tb.Text.Length) { tb.Text = tb.Text.Remove(start, 1); tb.SelectionStart = start; }
+            tb.SelectionLength = 0;
+        }
+
+        private void MoveCaret(TextBox tb, int delta)
+        {
+            int p = tb.SelectionStart + delta;
+            if (p < 0) p = 0;
+            if (p > tb.Text.Length) p = tb.Text.Length;
+            tb.SelectionStart = p;
+            tb.SelectionLength = 0;
+        }
+
+        private void FocusNextConfirmBox(TextBox tb)
+        {
+            var order = new[] { txtTP, txtSL, txtS1Start, txtS1End, txtS2Start, txtS2End };
+            int i = Array.IndexOf(order, tb);
+            if (i < 0) return;
+            var next = order[(i + 1) % order.Length];
+            if (next == null) return;
+            next.Focus();
+            Keyboard.Focus(next);
+            next.SelectAll();
+        }
+
+        private void OnConfirmClick(object sender, RoutedEventArgs e)
+        {
+            string err;
+            if (!ValidateAndApply(out err))
+            {
+                if (lblConfirmError != null) lblConfirmError.Text = err;
+                return;
+            }
+
+            SaveConfirmedParams();
+            isArmed = true;
+
+            if (confirmView != null) confirmView.Visibility = Visibility.Collapsed;
+            if (tradingView != null) tradingView.Visibility = Visibility.Visible;
+
+            PrintAndLog($">>> PARAMETERS CONFIRMED & ARMED | SL=${StopLossUSD:F0} TP=${TakeProfitUSD:F0} | Sessions: {GetTradingHoursString()} | AutoTrade={EnableAutoTrading}", DateTime.Now);
+        }
+
+        private bool ValidateAndApply(out string error)
+        {
+            error = "";
+
+            if (!double.TryParse(txtTP.Text.Trim(), out double tp) || tp < 10 || tp > 3000)
+            { error = "TP must be 10-3000"; return false; }
+            if (!double.TryParse(txtSL.Text.Trim(), out double sl) || sl < 10 || sl > 3000)
+            { error = "SL must be 10-3000"; return false; }
+
+            if (!TryParseHHMM(txtS1Start.Text, out int s1sh, out int s1sm)) { error = "S1 start: use HH:MM"; return false; }
+            if (!TryParseHHMM(txtS1End.Text,   out int s1eh, out int s1em)) { error = "S1 end: use HH:MM"; return false; }
+            if (!TryParseHHMM(txtS2Start.Text, out int s2sh, out int s2sm)) { error = "S2 start: use HH:MM"; return false; }
+            if (!TryParseHHMM(txtS2End.Text,   out int s2eh, out int s2em)) { error = "S2 end: use HH:MM"; return false; }
+
+            if (s1sh * 60 + s1sm > s1eh * 60 + s1em) { error = "S1 start after end"; return false; }
+            if (s2sh * 60 + s2sm > s2eh * 60 + s2em) { error = "S2 start after end"; return false; }
+
+            TakeProfitUSD = tp;
+            StopLossUSD = sl;
+            Session1StartHour = s1sh; Session1StartMinute = s1sm;
+            Session1EndHour   = s1eh; Session1EndMinute   = s1em;
+            Session2StartHour = s2sh; Session2StartMinute = s2sm;
+            Session2EndHour   = s2eh; Session2EndMinute   = s2em;
+            EnableAutoTrading = chkAutoTrade?.IsChecked ?? false;
+
+            return true;
+        }
+
+        private bool TryParseHHMM(string s, out int hh, out int mm)
+        {
+            hh = 0; mm = 0;
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            string[] p = s.Trim().Split(':');
+            if (p.Length != 2) return false;
+            if (!int.TryParse(p[0].Trim(), out hh) || !int.TryParse(p[1].Trim(), out mm)) return false;
+            if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return false;
+            return true;
+        }
+
+        private void SaveConfirmedParams()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(confirmedParamsFile)) return;
+                string dir = System.IO.Path.GetDirectoryName(confirmedParamsFile);
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+                string line = string.Join(",",
+                    TakeProfitUSD.ToString("F0"),
+                    StopLossUSD.ToString("F0"),
+                    Session1StartHour, Session1StartMinute,
+                    Session1EndHour, Session1EndMinute,
+                    Session2StartHour, Session2StartMinute,
+                    Session2EndHour, Session2EndMinute,
+                    EnableAutoTrading ? "1" : "0");
+
+                File.WriteAllText(confirmedParamsFile, line);
+            }
+            catch { }
+        }
+
+        private void LoadConfirmedParams()
+        {
+            try
+            {
+                string settingsDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "NinjaTrader 8", "settings");
+                string instr = (Instrument != null && Instrument.MasterInstrument != null) ? Instrument.MasterInstrument.Name : "DEFAULT";
+                confirmedParamsFile = System.IO.Path.Combine(settingsDir, $"ANT_ConfirmedParams_{instr}.txt");
+
+                if (!File.Exists(confirmedParamsFile)) return;
+
+                string[] p = File.ReadAllText(confirmedParamsFile).Split(',');
+                if (p.Length < 11) return;
+
+                if (double.TryParse(p[0], out double tp)) TakeProfitUSD = tp;
+                if (double.TryParse(p[1], out double sl)) StopLossUSD = sl;
+                if (int.TryParse(p[2], out int v2)) Session1StartHour = v2;
+                if (int.TryParse(p[3], out int v3)) Session1StartMinute = v3;
+                if (int.TryParse(p[4], out int v4)) Session1EndHour = v4;
+                if (int.TryParse(p[5], out int v5)) Session1EndMinute = v5;
+                if (int.TryParse(p[6], out int v6)) Session2StartHour = v6;
+                if (int.TryParse(p[7], out int v7)) Session2StartMinute = v7;
+                if (int.TryParse(p[8], out int v8)) Session2EndHour = v8;
+                if (int.TryParse(p[9], out int v9)) Session2EndMinute = v9;
+                EnableAutoTrading = p[10].Trim() == "1";
+            }
+            catch { }
         }
         
         private Grid CreateRow(string name, ref CheckBox chk, ref TextBlock lbl, bool isChecked)
@@ -194,6 +536,12 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             try
             {
+                if (hostWindow != null && hostKeyHandler != null)
+                {
+                    hostWindow.RemoveHandler(UIElement.PreviewKeyDownEvent, hostKeyHandler);
+                    hostWindow = null;
+                    hostKeyHandler = null;
+                }
                 if (controlPanel != null && panelActive)
                 {
                     controlPanel.MouseLeftButtonDown -= Panel_MouseLeftButtonDown;
@@ -559,28 +907,28 @@ namespace NinjaTrader.NinjaScript.Strategies
                     
                     if (longWindowOpen)
                     {
-                        lblAIQ1Name.Text = "AIQ_1 (Yellow â– )";
+                        lblAIQ1Name.Text = "AIQ_1 (Yellow ???)";
                         lblAIQ1Name.Foreground = Brushes.Yellow;
                     }
                     else if (shortWindowOpen)
                     {
-                        lblAIQ1Name.Text = "AIQ_1 (Orange â– )";
+                        lblAIQ1Name.Text = "AIQ_1 (Orange ???)";
                         lblAIQ1Name.Foreground = Brushes.Orange;
                     }
                     else if (bearConf >= MinConfluenceRequired)
                     {
-                        lblAIQ1Name.Text = "AIQ_1 (Orange â– )";
+                        lblAIQ1Name.Text = "AIQ_1 (Orange ???)";
                         lblAIQ1Name.Foreground = Brushes.Orange;
                     }
                     else if (bullConf >= MinConfluenceRequired)
                     {
-                        lblAIQ1Name.Text = "AIQ_1 (Yellow â– )";
+                        lblAIQ1Name.Text = "AIQ_1 (Yellow ???)";
                         lblAIQ1Name.Foreground = Brushes.Yellow;
                     }
                     else
                     {
                         // Low confluence - show based on current AIQ1 state
-                        lblAIQ1Name.Text = AIQ1_IsUp ? "AIQ_1 (Yellow â– )" : "AIQ_1 (Orange â– )";
+                        lblAIQ1Name.Text = AIQ1_IsUp ? "AIQ_1 (Yellow ???)" : "AIQ_1 (Orange ???)";
                         lblAIQ1Name.Foreground = Brushes.Gray;
                     }
                 }
@@ -595,13 +943,13 @@ namespace NinjaTrader.NinjaScript.Strategies
                         double secondsSinceSignal = (DateTime.Now - lastSignalTime).TotalSeconds;
                         inCooldown = secondsSinceSignal < CooldownSeconds;
                         if (inCooldown)
-                            cooldownText = $"ðŸ• Cooldown ({secondsSinceSignal:F0}s/{CooldownSeconds}s)";
+                            cooldownText = $"???? Cooldown ({secondsSinceSignal:F0}s/{CooldownSeconds}s)";
                     }
                     else
                     {
                         inCooldown = CooldownBars > 0 && barsSinceLastSignal >= 0 && barsSinceLastSignal < CooldownBars;
                         if (inCooldown)
-                            cooldownText = $"ðŸ• Cooldown ({barsSinceLastSignal}/{CooldownBars})";
+                            cooldownText = $"???? Cooldown ({barsSinceLastSignal}/{CooldownBars})";
                     }
                     
                     if (inCooldown)
@@ -611,12 +959,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (barsSinceYellowSquare >= 0 && barsSinceYellowSquare <= MaxBarsAfterYellowSquare)
                     {
-                        lblWindowStatus.Text = $"âš¡ LONG Window ({barsSinceYellowSquare}/{MaxBarsAfterYellowSquare})";
+                        lblWindowStatus.Text = $"??? LONG Window ({barsSinceYellowSquare}/{MaxBarsAfterYellowSquare})";
                         lblWindowStatus.Foreground = Brushes.Lime;
                     }
                     else if (barsSinceOrangeSquare >= 0 && barsSinceOrangeSquare <= MaxBarsAfterYellowSquare)
                     {
-                        lblWindowStatus.Text = $"âš¡ SHORT Window ({barsSinceOrangeSquare}/{MaxBarsAfterYellowSquare})";
+                        lblWindowStatus.Text = $"??? SHORT Window ({barsSinceOrangeSquare}/{MaxBarsAfterYellowSquare})";
                         lblWindowStatus.Foreground = Brushes.Orange;
                     }
                     else
@@ -628,7 +976,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 
                 var (bull, bear, total) = GetConfluence();
                 string dailyPnLText = (EnableDailyLossLimit || EnableDailyProfitTarget) ? $" | Day: ${dailyPnL:F0}" : "";
-                string limitHitText = dailyLossLimitHit ? " ðŸ›‘STOPPED" : (dailyProfitTargetHit ? " ðŸŽ¯TARGET" : "");
+                string limitHitText = dailyLossLimitHit ? " ????STOPPED" : (dailyProfitTargetHit ? " ????TARGET" : "");
                 if (lblSessionStats != null) lblSessionStats.Text = $"Signals: {signalCount} | Bull:{bull} Bear:{bear}/{total}{dailyPnLText}{limitHitText}";
 
                 if (lblLastSignal != null && signalBorder != null)
@@ -646,7 +994,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (longWindowOpen && RR_IsUp && bull >= MinConfluenceRequired)
                     {
-                        lblLastSignal.Text = $"ðŸ”” READY: LONG ({bull}/{total})";
+                        lblLastSignal.Text = $"???? READY: LONG ({bull}/{total})";
                         lblLastSignal.FontWeight = FontWeights.Bold;
                         lblLastSignal.Foreground = Brushes.Lime;
                         signalBorder.BorderBrush = Brushes.Lime;
@@ -654,7 +1002,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (shortWindowOpen && !RR_IsUp && bear >= MinConfluenceRequired)
                     {
-                        lblLastSignal.Text = $"ðŸ”” READY: SHORT ({bear}/{total})";
+                        lblLastSignal.Text = $"???? READY: SHORT ({bear}/{total})";
                         lblLastSignal.FontWeight = FontWeights.Bold;
                         lblLastSignal.Foreground = Brushes.Orange;
                         signalBorder.BorderBrush = Brushes.Orange;
@@ -680,7 +1028,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (bull >= MinConfluenceRequired)
                     {
-                        lblLastSignal.Text = $"Bull OK ({bull}/{total})\nWaiting for Yellow â– ...";
+                        lblLastSignal.Text = $"Bull OK ({bull}/{total})\nWaiting for Yellow ???...";
                         lblLastSignal.FontWeight = FontWeights.Normal;
                         lblLastSignal.Foreground = Brushes.Lime;
                         signalBorder.BorderBrush = Brushes.Lime;
@@ -688,7 +1036,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (bear >= MinConfluenceRequired)
                     {
-                        lblLastSignal.Text = $"Bear OK ({bear}/{total})\nWaiting for Orange â– ...";
+                        lblLastSignal.Text = $"Bear OK ({bear}/{total})\nWaiting for Orange ???...";
                         lblLastSignal.FontWeight = FontWeights.Normal;
                         lblLastSignal.Foreground = Brushes.Orange;
                         signalBorder.BorderBrush = Brushes.Orange;
