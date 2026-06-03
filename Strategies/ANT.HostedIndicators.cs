@@ -440,7 +440,6 @@ namespace NinjaTrader.NinjaScript.Strategies
             private readonly bool _smoothEnabled;
 
             private double _momEma, _smoothEma;
-            private double _prevSignal, _prevSmoothSignal;
             private bool _initialized;
 
             public bool   IsUptrend  { get; private set; }
@@ -499,7 +498,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             private double[] _trBuffer;
             private double[] _refBuffer;
             private int _trIdx, _refIdx;
-            private double _atr, _trailingStop, _trendLine, _refPrice;
+            private double _atr, _trailingStop, _refPrice;
             private bool _initialized;
 
             public bool IsUptrend  { get; private set; }
@@ -693,7 +692,6 @@ namespace NinjaTrader.NinjaScript.Strategies
             private double[] _mainBuf, _fastBuf;
             private int _mIdx, _fIdx;
             private double _mainMiddle, _mainUpper, _mainLower;
-            private bool _prevAbove, _prevBelow;
 
             public bool IsUptrend { get; private set; }
 

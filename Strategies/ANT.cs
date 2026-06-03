@@ -35,29 +35,14 @@ namespace NinjaTrader.NinjaScript.Strategies
     {
         #region Fields
         // ninZa indicator references (for VPS with licensed indicators)
-        private object rubyRiver, vidyaPro, easyTrend, dragonTrend, solarWave, ninZaT3Pro, aaaTrendSync;
-        private FieldInfo rrIsUptrend, vyIsUptrend, etIsUptrend, dtPrevSignal, swIsUptrend, swCountWave, t3pIsUptrend, aaaIsUptrend;
         
         // Native AIQ_1 indicator reference (from AIQ folder)
-        private object nativeAiq1;
-        private FieldInfo nativeAiq1TrendState;  // Int32: 1=up, -1=down
         private bool useNativeAiq1;
         
         // Native AIQ_SuperBands indicator reference
-        private object nativeAiqSuperBands;
-        private FieldInfo nativeAiqSBIsUptrend;
         private bool useNativeAiqSB;
         
         // Chart-attached equivalent indicator references
-        private object chartAiq1Equivalent, chartRubyRiverEquiv, chartDragonTrendEquiv;
-        private object chartVidyaProEquiv, chartEasyTrendEquiv, chartSolarWaveEquiv, chartT3ProEquiv;
-        private object chartAAATrendSyncEquiv;
-        private object chartAiqSuperBandsEquiv;
-        private PropertyInfo aiq1IsUptrend;
-        private PropertyInfo rrEquivIsUptrend, dtEquivPrevSignal, vyEquivIsUptrend, etEquivIsUptrend;
-        private PropertyInfo swEquivIsUptrend, swEquivCountWave, t3pEquivIsUptrend;
-        private PropertyInfo aaaEquivIsUptrend;
-        private PropertyInfo sbEquivIsUptrend;
         private bool useChartAiq1, useChartRR, useChartDT, useChartVY, useChartET, useChartSW, useChartT3P;
         private bool useChartAAA;
         private bool useChartSB;
@@ -87,12 +72,10 @@ namespace NinjaTrader.NinjaScript.Strategies
         private bool isDragging;
         private bool isResizing;
         private Point dragStartPoint;
-        private Point resizeStartPoint;
         private double resizeStartWidth, resizeStartHeight;
         private TranslateTransform panelTransform;
         private ScaleTransform panelScale;
         private string panelSettingsFile;
-        private Border resizeGrip;
         private CheckBox chkRubyRiver, chkDragonTrend, chkSolarWave, chkVIDYA, chkEasyTrend, chkT3Pro, chkAAASync, chkSuperBands;
         private TextBlock lblRubyRiver, lblDragonTrend, lblSolarWave, lblVIDYA, lblEasyTrend, lblT3Pro, lblAAASync, lblSuperBands;
         private TextBlock lblAIQ1Status, lblWindowStatus;

@@ -49,16 +49,6 @@ namespace NinjaTrader.NinjaScript.Strategies
             useHostedDragonTrend = true;
             useHostedSolarWave = true;
 
-            // Clear any chart-attached references to be safe
-            chartAiq1Equivalent = null;
-            chartRubyRiverEquiv = null;
-            chartDragonTrendEquiv = null;
-            chartVidyaProEquiv = null;
-            chartEasyTrendEquiv = null;
-            chartSolarWaveEquiv = null;
-            chartT3ProEquiv = null;
-            chartAAATrendSyncEquiv = null;
-            chartAiqSuperBandsEquiv = null;
 
             InitHostedCalculators();
             indicatorsReady = true;

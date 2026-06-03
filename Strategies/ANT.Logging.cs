@@ -67,13 +67,13 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             // Returns a short code indicating indicator sources: N=ninZa, C=Chart, H=Hosted, -=N/A
             string aiq = useNativeAiq1 ? "N" : (useChartAiq1 ? "C" : "H");
-            string rr = rubyRiver != null ? "N" : (useChartRR ? "C" : "H");
-            string dt = dragonTrend != null ? "N" : (useChartDT ? "C" : "H");
-            string vy = vidyaPro != null ? "N" : (useChartVY ? "C" : "H");
-            string et = easyTrend != null ? "N" : (useChartET ? "C" : "H");
-            string sw = solarWave != null ? "N" : (useChartSW ? "C" : "H");
-            string t3 = ninZaT3Pro != null ? "N" : (useChartT3P ? "C" : "H");
-            string aaa = aaaTrendSync != null ? "N" : (useChartAAA ? "C" : "H");
+            string rr = useChartRR ? "C" : "H";
+            string dt = useChartDT ? "C" : "H";
+            string vy = useChartVY ? "C" : "H";
+            string et = useChartET ? "C" : "H";
+            string sw = useChartSW ? "C" : "H";
+            string t3 = useChartT3P ? "C" : "H";
+            string aaa = useChartAAA ? "C" : "H";
             string sb = useNativeAiqSB ? "N" : (useChartSB ? "C" : "H");
             return $"AIQ:{aiq}|RR:{rr}|DT:{dt}|VY:{vy}|ET:{et}|SW:{sw}|T3:{t3}|AAA:{aaa}|SB:{sb}";
         }
@@ -85,14 +85,14 @@ namespace NinjaTrader.NinjaScript.Strategies
         #endregion
         
         #region Price Helpers
-        private double GetCurrentAsk()
+        private new double GetCurrentAsk()
         {
             if (BarsInProgress == 0 && GetCurrentAsk(0) > 0)
                 return GetCurrentAsk(0);
             return Close[0];
         }
         
-        private double GetCurrentBid()
+        private new double GetCurrentBid()
         {
             if (BarsInProgress == 0 && GetCurrentBid(0) > 0)
                 return GetCurrentBid(0);
