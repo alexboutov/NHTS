@@ -1,4 +1,4 @@
-﻿#region Using declarations
+#region Using declarations
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -43,7 +43,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 csvWriter = new StreamWriter(csvLogFilePath, false) { AutoFlush = true };
                 // Write CSV header - includes AAA_IsUp
                 csvWriter.WriteLine("BarTime,Close,AIQ1_IsUp,RR_IsUp,DT_Signal,VY_IsUp,ET_IsUp,SW_IsUp,SW_Count,T3P_IsUp,AAA_IsUp,SB_IsUp,BullConf,BearConf,Source");
-                LogAlways($"ðŸ“Š CSV Log: {csvLogFilePath}");
+                LogAlways($"\U0001F4CA CSV Log: {csvLogFilePath}");
             }
             catch (Exception ex) { Print($"CSV Init Error: {ex.Message}"); }
         }
@@ -143,23 +143,23 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
             
             string instrumentName = Instrument.FullName;
-            string squareType = dir == "LONG" ? "YellowðŸŸ¨" : "OrangeðŸŸ§";
+            string squareType = dir == "LONG" ? "Yellow\U0001F7E8" : "Orange\U0001F7E7";
             
             PrintAndLog($"", t);
-            PrintAndLog($"â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—", t);
+            PrintAndLog($"\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557", t);
             // FIXED: Include full date in signal timestamp for Market Replay analysis
-            PrintAndLog($"â•‘  *** {dir} SIGNAL @ {t:yyyy-MM-dd HH:mm:ss} ***", t);
-            PrintAndLog($"â• â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•£", t);
-            PrintAndLog($"â•‘  Instrument: {instrumentName}", t);
-            PrintAndLog($"â•‘  Ask: {askPrice:F2}    Bid: {bidPrice:F2}", t);
-            PrintAndLog($"â•‘  STOP: {stopPrice:F2}  (${StopLossUSD:F0} = {stopPoints:F2} pts)", t);
-            PrintAndLog($"â•‘  TP:   {tpPrice:F2}  (${TakeProfitUSD:F0} = {tpPoints:F2} pts)", t);
-            PrintAndLog($"â• â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•£", t);
-            PrintAndLog($"â•‘  Trigger: {trigger}", t);
-            PrintAndLog($"â•‘  Confluence: {confluenceCount}/{total}", t);
-            PrintAndLog($"â•‘  RR={Ts(RR_IsUp)} DT={DT_Signal:F0} VY={Ts(VY_IsUp)} ET={Ts(ET_IsUp)} SW={SW_Count} T3P={Ts(T3P_IsUp)} AAA={Ts(AAA_IsUp)} SB={Ts(SB_IsUp)}", t);
-            PrintAndLog($"â•‘  AIQ1={Ts(AIQ1_IsUp)} | Bars after {squareType}: {barsAfterSquare}", t);
-            PrintAndLog($"â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•", t);
+            PrintAndLog($"\u2551  *** {dir} SIGNAL @ {t:yyyy-MM-dd HH:mm:ss} ***", t);
+            PrintAndLog($"\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563", t);
+            PrintAndLog($"\u2551  Instrument: {instrumentName}", t);
+            PrintAndLog($"\u2551  Ask: {askPrice:F2}    Bid: {bidPrice:F2}", t);
+            PrintAndLog($"\u2551  STOP: {stopPrice:F2}  (${StopLossUSD:F0} = {stopPoints:F2} pts)", t);
+            PrintAndLog($"\u2551  TP:   {tpPrice:F2}  (${TakeProfitUSD:F0} = {tpPoints:F2} pts)", t);
+            PrintAndLog($"\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563", t);
+            PrintAndLog($"\u2551  Trigger: {trigger}", t);
+            PrintAndLog($"\u2551  Confluence: {confluenceCount}/{total}", t);
+            PrintAndLog($"\u2551  RR={Ts(RR_IsUp)} DT={DT_Signal:F0} VY={Ts(VY_IsUp)} ET={Ts(ET_IsUp)} SW={SW_Count} T3P={Ts(T3P_IsUp)} AAA={Ts(AAA_IsUp)} SB={Ts(SB_IsUp)}", t);
+            PrintAndLog($"\u2551  AIQ1={Ts(AIQ1_IsUp)} | Bars after {squareType}: {barsAfterSquare}", t);
+            PrintAndLog($"\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255D", t);
         }
         
         private string Ts(bool up) => up ? "UP" : "DN";
@@ -173,7 +173,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 string dir = System.IO.Path.Combine(NinjaTrader.Core.Globals.UserDataDir, "log");
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 logFilePath = System.IO.Path.Combine(dir, $"ANT_{DateTime.Now:yyyy-MM-dd}_{chartSessionId}.txt");
-                logWriter = new StreamWriter(logFilePath, true) { AutoFlush = true };
+                logWriter = new StreamWriter(logFilePath, true, new System.Text.UTF8Encoding(false)) { AutoFlush = true };
                 logWriter.WriteLine($"\n=== ANT Started: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
                 if (UniRenkoMode)
                 {
@@ -194,8 +194,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                     logWriter.WriteLine($"    Auto-Close Before News: {NewsCloseHour:D2}:{NewsCloseMinute:D2}");
                 if (CloseAtEndOfDay)
                     logWriter.WriteLine($"    Auto-Close EOD: {EODCloseHour:D2}:{EODCloseMinute:D2}");
-                logWriter.WriteLine($"    LONG:  YellowðŸŸ¨ (AIQ1 UP) â†’ Any indicator confirms â†’ Bull Confluence â‰¥ {MinConfluenceRequired}");
-                logWriter.WriteLine($"    SHORT: OrangeðŸŸ§ (AIQ1 DN) â†’ Any indicator confirms â†’ Bear Confluence â‰¥ {MinConfluenceRequired}\n");
+                logWriter.WriteLine($"    LONG:  Yellow\U0001F7E8 (AIQ1 UP) \u2192 Any indicator confirms \u2192 Bull Confluence \u2265 {MinConfluenceRequired}");
+                logWriter.WriteLine($"    SHORT: Orange\U0001F7E7 (AIQ1 DN) \u2192 Any indicator confirms \u2192 Bear Confluence \u2265 {MinConfluenceRequired}\n");
             }
             catch { }
         }
@@ -299,7 +299,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     dailyPnL += tradePnL;
                     dailyTradeCount++;
                     
-                    string pnlIcon = tradePnL >= 0 ? "âœ…" : "âŒ";
+                    string pnlIcon = tradePnL >= 0 ? "\u2705" : "\u274C";
                     string ticksStr = ticksPnL >= 0 ? $"+{ticksPnL:F0}t" : $"{ticksPnL:F0}t";
                     string exitSlipStr = exitSlippageTicks >= 0 ? $"+{exitSlippageTicks:F0}t" : $"{exitSlippageTicks:F0}t";
                     
@@ -319,7 +319,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     if (EnableDailyLossLimit && dailyPnL <= -DailyLossLimitUSD)
                     {
                         dailyLossLimitHit = true;
-                        PrintAndLog($"ðŸ›‘ DAILY LOSS LIMIT HIT: ${dailyPnL:F2} exceeds -${DailyLossLimitUSD:F2} limit. Trading stopped for today.", time);
+                        PrintAndLog($"\U0001F6D1 DAILY LOSS LIMIT HIT: ${dailyPnL:F2} exceeds -${DailyLossLimitUSD:F2} limit. Trading stopped for today.", time);
                         if (EnableSoundAlert)
                             try { System.Media.SystemSounds.Hand.Play(); } catch { }
                     }
@@ -327,7 +327,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     if (EnableDailyProfitTarget && dailyPnL >= DailyProfitTargetUSD)
                     {
                         dailyProfitTargetHit = true;
-                        PrintAndLog($"ðŸŽ¯ DAILY PROFIT TARGET HIT: ${dailyPnL:F2} reached ${DailyProfitTargetUSD:F2} target. Trading stopped for today.", time);
+                        PrintAndLog($"\U0001F3AF DAILY PROFIT TARGET HIT: ${dailyPnL:F2} reached ${DailyProfitTargetUSD:F2} target. Trading stopped for today.", time);
                         if (EnableSoundAlert)
                             try { System.Media.SystemSounds.Asterisk.Play(); } catch { }
                     }
