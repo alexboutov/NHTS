@@ -1,4 +1,4 @@
-#region Using declarations
+﻿#region Using declarations
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,16 +22,16 @@ using NinjaTrader.NinjaScript.Indicators;
 namespace NinjaTrader.NinjaScript.Strategies
 {
     /// <summary>
-    /// NHTS - AIQ_1 trigger + any indicator confirmation with 8-indicator confluence filter
+    /// ANT - AIQ_1 trigger + any indicator confirmation with 8-indicator confluence filter
     /// 
     /// Split into partial classes:
-    ///   - NHTS.cs           (Main: fields, parameters, OnStateChange, OnBarUpdate)
-    ///   - NHTS.Panel.cs     (Panel UI: create, update, event handlers)
-    ///   - NHTS.Indicators.cs (Indicator loading, accessors, reflection)
-    ///   - NHTS.Signals.cs   (Confluence, confirmation, trading hours)
-    ///   - NHTS.Logging.cs   (CSV logging, signal logging, file management)
+    ///   - ANT.cs           (Main: fields, parameters, OnStateChange, OnBarUpdate)
+    ///   - ANT.Panel.cs     (Panel UI: create, update, event handlers)
+    ///   - ANT.Indicators.cs (Indicator loading, accessors, reflection)
+    ///   - ANT.Signals.cs   (Confluence, confirmation, trading hours)
+    ///   - ANT.Logging.cs   (CSV logging, signal logging, file management)
     /// </summary>
-    public partial class NHTS : Strategy
+    public partial class ANT : Strategy
     {
         #region Fields
         // ninZa indicator references (for VPS with licensed indicators)
@@ -436,7 +436,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             if (State == State.SetDefaults)
             {
-                Name = "NHTS";
+                Name = "ANT";
                 Description = "AIQ_1 trigger + any indicator confirmation with 8-indicator confluence filter (LONG + SHORT)";
                 Calculate = Calculate.OnBarClose;
                 EntriesPerDirection = 1;
@@ -571,7 +571,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 InitializeLogFile();
                 InitializeCSVLog();
                 
-                LogAlways($"NHTS | 7-indicator confluence | Signal\u2265{MinConfluenceRequired} Trade\u2265{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
+                LogAlways($"ANT | 7-indicator confluence | Signal\u2265{MinConfluenceRequired} Trade\u2265{MinConfluenceForAutoTrade} | CD={CooldownBars} | SL=${StopLossUSD} TP=${TakeProfitUSD} | AutoTrade={EnableAutoTrading}");
                 if (StopLossBufferTicks > 0)
                     LogAlways($"SL Buffer: {StopLossBufferTicks} ticks");
                 if (EnableDynamicExit)

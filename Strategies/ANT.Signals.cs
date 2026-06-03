@@ -1,4 +1,4 @@
-#region Using declarations
+﻿#region Using declarations
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,7 +21,7 @@ using NinjaTrader.NinjaScript.Indicators;
 
 namespace NinjaTrader.NinjaScript.Strategies
 {
-    public partial class NHTS
+    public partial class ANT
     {
         #region Signal and Confluence Logic
         

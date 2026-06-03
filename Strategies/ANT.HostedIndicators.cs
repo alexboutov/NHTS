@@ -1,11 +1,11 @@
-// NHTS.HostedIndicators.cs
+﻿// ANT.HostedIndicators.cs
 // Pure C# calculator classes for hosted indicator fallback mode.
 // These replicate the calculation logic of the *Equivalent NT8 indicators
 // without any NT8 framework dependencies (no Series<>, no AddChartIndicator,
-// no OnBarUpdate inheritance). NHTS calls Update() on each instance from
+// no OnBarUpdate inheritance). ANT calls Update() on each instance from
 // its own OnBarUpdate when the hosted fallback path is active.
 //
-// Usage in NHTS.OnBarUpdate (after indicatorsReady check):
+// Usage in ANT.OnBarUpdate (after indicatorsReady check):
 //   if (useHostedT3Pro)        _t3Calc.Update(CurrentBar, Open[0], High[0], Low[0], Close[0], TickSize);
 //   if (useHostedVIDYAPro)     _vidyaCalc.Update(CurrentBar, High[0], Low[0], Close[0]);
 //   ... etc.
@@ -20,9 +20,9 @@ using System;
 
 namespace NinjaTrader.NinjaScript.Strategies
 {
-    public partial class NHTS
+    public partial class ANT
     {
-        // ── Hosted calculator instances ───────────────────────────────────────
+        // â”€â”€ Hosted calculator instances â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private T3ProCalc        _t3Calc;
         private VIDYAProCalc     _vidyaCalc;
         private EasyTrendCalc    _etCalc;
@@ -35,7 +35,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         private ATRCalc          _atrCalc;        // dynamic-exit ATR (period 14)
         private ATRCalc          _atrTrailCalc;   // trailing-stop ATR (ATRTrailPeriod)
 
-        // ── Initialise with same defaults used in NHTS.cs State.Configure ────
+        // â”€â”€ Initialise with same defaults used in ANT.cs State.Configure â”€â”€â”€â”€
         private void InitHostedCalculators()
         {
             _t3Calc = new T3ProCalc(
@@ -97,7 +97,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             _atrTrailCalc = new ATRCalc(ATRTrailPeriod);
         }
 
-        // ── Call from NHTS.OnBarUpdate for hosted fallback path ───────────────
+        // â”€â”€ Call from ANT.OnBarUpdate for hosted fallback path â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         private void UpdateHostedCalculators()
         {
             double o = Open[0], h = High[0], l = Low[0], c = Close[0];
@@ -119,12 +119,12 @@ namespace NinjaTrader.NinjaScript.Strategies
             _atrTrailCalc.Update(bar, h, l, c, prevC);
         }
 
-        // ═════════════════════════════════════════════════════════════════════
-        // ATR Calculator (NT8-exact) — Option B hosted, no NT8 indicator object
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // ATR Calculator (NT8-exact) â€” Option B hosted, no NT8 indicator object
         //   bar 0:    Value = High - Low
         //   bar n>0:  Value = ((min(bar+1,P) - 1) * prevValue + TR) / min(bar+1,P)
         //   TR = max(H-L, |H-prevC|, |L-prevC|)
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class ATRCalc
         {
             private readonly int _period;
@@ -153,9 +153,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // T3 Pro Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class T3ProCalc
         {
             private readonly int _period, _tCount, _chaosPeriod, _filterATRPeriod;
@@ -245,9 +245,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // VIDYA Pro Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class VIDYAProCalc
         {
             private readonly int _period, _volPeriod, _smoothPeriod, _atrPeriod;
@@ -325,9 +325,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // EasyTrend Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class EasyTrendCalc
         {
             private readonly int _period, _smoothPeriod, _atrPeriod;
@@ -377,9 +377,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // Ruby River Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class RubyRiverCalc
         {
             private readonly int _maPeriod, _smoothPeriod, _offsetPeriod;
@@ -431,9 +431,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // Dragon Trend Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class DragonTrendCalc
         {
             private readonly int _period, _smoothPeriod;
@@ -488,9 +488,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // Solar Wave Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class SolarWaveCalc
         {
             private readonly int _atrPeriod, _refPeriod, _refCloseWeight;
@@ -561,9 +561,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // AIQ_1 Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class AIQ1Calc
         {
             private readonly int _period;
@@ -630,9 +630,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // AAATrendSync Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class AAACalc
         {
             private readonly int _fp, _fsp, _mp, _msp, _sp, _ssp, _atrPeriod;
@@ -663,7 +663,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 }
 
                 // ATR (for spread filter)
-                double prevClose = close; // best we can do without prevClose param here — use close as proxy on bar 0
+                double prevClose = close; // best we can do without prevClose param here â€” use close as proxy on bar 0
                 _atrEma += (2.0 / (_atrPeriod + 1)) * ((high - low) - _atrEma);
 
                 // EMAs
@@ -684,9 +684,9 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
         }
 
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // AIQ SuperBands Calculator
-        // ═════════════════════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         private class SuperBandsCalc
         {
             private readonly int _mainLen, _fastLen;

@@ -3,25 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36811.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHTS", "NHTS.csproj", "{365109D7-1687-45ED-A2C0-24D0DF6F25F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ANT", "ANT.csproj", "{365109D7-1687-45ED-A2C0-24D0DF6F25F2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
-		Indicators\AAATrendSyncEquivalent.cs = Indicators\AAATrendSyncEquivalent.cs
-		Indicators\AIQ_1Equivalent.cs = Indicators\AIQ_1Equivalent.cs
-		Indicators\AIQ_SuperBandsEquivalent.cs = Indicators\AIQ_SuperBandsEquivalent.cs
-		Indicators\DragonTrendEquivalent.cs = Indicators\DragonTrendEquivalent.cs
-		Indicators\EasyTrendEquivalent.cs = Indicators\EasyTrendEquivalent.cs
-		Strategies\NHTS.cs = Strategies\NHTS.cs
-		Strategies\NHTS.Indicators.cs = Strategies\NHTS.Indicators.cs
-		Strategies\NHTS.Logging.cs = Strategies\NHTS.Logging.cs
-		Strategies\NHTS.Panel.cs = Strategies\NHTS.Panel.cs
-		Strategies\NHTS.Signals.cs = Strategies\NHTS.Signals.cs
+		Strategies\ANT.cs = Strategies\ANT.cs
+		Strategies\ANT.Indicators.cs = Strategies\ANT.Indicators.cs
+		Strategies\ANT.Logging.cs = Strategies\ANT.Logging.cs
+		Strategies\ANT.Panel.cs = Strategies\ANT.Panel.cs
+		Strategies\ANT.Signals.cs = Strategies\ANT.Signals.cs
 		Docs\PRD.txt = Docs\PRD.txt
-		Indicators\RubyRiverEquivalent.cs = Indicators\RubyRiverEquivalent.cs
-		Indicators\SolarWaveEquivalent.cs = Indicators\SolarWaveEquivalent.cs
-		Indicators\T3ProEquivalent.cs = Indicators\T3ProEquivalent.cs
-		Indicators\VIDYAProEquivalent.cs = Indicators\VIDYAProEquivalent.cs
 	EndProjectSection
 EndProject
 Global

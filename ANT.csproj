@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -7,8 +7,8 @@
     <ProjectGuid>{365109D7-1687-45ED-A2C0-24D0DF6F25F2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NHTS</RootNamespace>
-    <AssemblyName>NHTS</AssemblyName>
+    <RootNamespace>ANT</RootNamespace>
+    <AssemblyName>ANT</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -78,12 +78,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Strategies\NHTS.cs" />
-    <Compile Include="Strategies\NHTS.Logging.cs" />
-    <Compile Include="Strategies\NHTS.Indicators.cs" />
-    <Compile Include="Strategies\NHTS.Panel.cs" />
-    <Compile Include="Strategies\NHTS.Signals.cs" />
-    <Compile Include="Strategies\NHTS.HostedIndicators.cs" />
+    <Compile Include="Strategies\ANT.cs" />
+    <Compile Include="Strategies\ANT.Logging.cs" />
+    <Compile Include="Strategies\ANT.Indicators.cs" />
+    <Compile Include="Strategies\ANT.Panel.cs" />
+    <Compile Include="Strategies\ANT.Signals.cs" />
+    <Compile Include="Strategies\ANT.HostedIndicators.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,4 +1,4 @@
-#region Using declarations
+﻿#region Using declarations
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,7 +22,7 @@ using NinjaTrader.NinjaScript.Indicators;
 
 namespace NinjaTrader.NinjaScript.Strategies
 {
-    public partial class NHTS
+    public partial class ANT
     {
         #region Resize Edge Enum
         private enum ResizeEdge
@@ -57,7 +57,7 @@ namespace NinjaTrader.NinjaScript.Strategies
             try
             {
                 string settingsDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "NinjaTrader 8", "settings");
-                panelSettingsFile = System.IO.Path.Combine(settingsDir, "NHTS_PanelSettings.txt");
+                panelSettingsFile = System.IO.Path.Combine(settingsDir, "ANT_PanelSettings.txt");
                 panelTransform = new TranslateTransform(0, 0);
                 panelScale = new ScaleTransform(1, 1);
                 
@@ -93,7 +93,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 lblSubtitle = new TextBlock { Foreground = Brushes.LightGray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,0,0,6) };
                 stack.Children.Add(lblSubtitle);
                 
-                stack.Children.Add(new TextBlock { Text = "── Confluence (8) ──", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
+                stack.Children.Add(new TextBlock { Text = "â”€â”€ Confluence (8) â”€â”€", Foreground = Brushes.Gray, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
                 
                 // Indicators in alphabetical order
                 stack.Children.Add(CreateRow("AAA TrendSync", ref chkAAASync, ref lblAAASync, UseAAATrendSync));
@@ -106,12 +106,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                 stack.Children.Add(CreateRow("VIDYA Pro", ref chkVIDYA, ref lblVIDYA, UseVIDYAPro));
                 
                 stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
-                stack.Children.Add(new TextBlock { Text = "── Trigger ──", Foreground = Brushes.Orange, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
+                stack.Children.Add(new TextBlock { Text = "â”€â”€ Trigger â”€â”€", Foreground = Brushes.Orange, FontSize = 8, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0,2,0,2) });
                 
                 var aiqRow = new Grid { Margin = new Thickness(0, 1, 0, 1) };
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 aiqRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
-                lblAIQ1Name = new TextBlock { Text = "AIQ_1 (Yellow ■)", Foreground = Brushes.Yellow, FontSize = 9, VerticalAlignment = VerticalAlignment.Center };
+                lblAIQ1Name = new TextBlock { Text = "AIQ_1 (Yellow â– )", Foreground = Brushes.Yellow, FontSize = 9, VerticalAlignment = VerticalAlignment.Center };
                 Grid.SetColumn(lblAIQ1Name, 0); aiqRow.Children.Add(lblAIQ1Name);
                 lblAIQ1Status = new TextBlock { Text = "---", Foreground = Brushes.Gray, FontSize = 9, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Right };
                 Grid.SetColumn(lblAIQ1Status, 1); aiqRow.Children.Add(lblAIQ1Status);
@@ -122,8 +122,8 @@ namespace NinjaTrader.NinjaScript.Strategies
                 
                 stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
 
-                lblTriggerMode = new TextBlock { Text = $"Signal≥{MinConfluenceRequired} Trade≥{MinConfluenceForAutoTrade} CD={CooldownBars}", Foreground = Brushes.LightGray, FontSize = 9 };
-                lblTradeStatus = new TextBlock { Text = EnableAutoTrading ? "⚡ AUTO TRADING ON" : "Mode: Signal Only", Foreground = EnableAutoTrading ? Brushes.Lime : Brushes.Cyan, FontWeight = FontWeights.Bold, FontSize = 10, Margin = new Thickness(0,2,0,2) };
+                lblTriggerMode = new TextBlock { Text = $"Signalâ‰¥{MinConfluenceRequired} Tradeâ‰¥{MinConfluenceForAutoTrade} CD={CooldownBars}", Foreground = Brushes.LightGray, FontSize = 9 };
+                lblTradeStatus = new TextBlock { Text = EnableAutoTrading ? "âš¡ AUTO TRADING ON" : "Mode: Signal Only", Foreground = EnableAutoTrading ? Brushes.Lime : Brushes.Cyan, FontWeight = FontWeights.Bold, FontSize = 10, Margin = new Thickness(0,2,0,2) };
                 lblSessionStats = new TextBlock { Text = "Signals: 0", Foreground = Brushes.LightGray, FontSize = 9 };
 
                 stack.Children.Add(lblTriggerMode);
@@ -133,7 +133,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 stack.Children.Add(new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(0,1,0,0), Margin = new Thickness(0,6,0,6) });
                 
                 signalBorder = new Border { BorderBrush = Brushes.Transparent, BorderThickness = new Thickness(2), CornerRadius = new CornerRadius(3), Padding = new Thickness(4) };
-                lblLastSignal = new TextBlock { Text = "Waiting for Yellow ■...", Foreground = Brushes.Gray, FontSize = 9, TextWrapping = TextWrapping.Wrap };
+                lblLastSignal = new TextBlock { Text = "Waiting for Yellow â– ...", Foreground = Brushes.Gray, FontSize = 9, TextWrapping = TextWrapping.Wrap };
                 signalBorder.Child = lblLastSignal;
                 stack.Children.Add(signalBorder);
                 
@@ -559,28 +559,28 @@ namespace NinjaTrader.NinjaScript.Strategies
                     
                     if (longWindowOpen)
                     {
-                        lblAIQ1Name.Text = "AIQ_1 (Yellow ■)";
+                        lblAIQ1Name.Text = "AIQ_1 (Yellow â– )";
                         lblAIQ1Name.Foreground = Brushes.Yellow;
                     }
                     else if (shortWindowOpen)
                     {
-                        lblAIQ1Name.Text = "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Text = "AIQ_1 (Orange â– )";
                         lblAIQ1Name.Foreground = Brushes.Orange;
                     }
                     else if (bearConf >= MinConfluenceRequired)
                     {
-                        lblAIQ1Name.Text = "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Text = "AIQ_1 (Orange â– )";
                         lblAIQ1Name.Foreground = Brushes.Orange;
                     }
                     else if (bullConf >= MinConfluenceRequired)
                     {
-                        lblAIQ1Name.Text = "AIQ_1 (Yellow ■)";
+                        lblAIQ1Name.Text = "AIQ_1 (Yellow â– )";
                         lblAIQ1Name.Foreground = Brushes.Yellow;
                     }
                     else
                     {
                         // Low confluence - show based on current AIQ1 state
-                        lblAIQ1Name.Text = AIQ1_IsUp ? "AIQ_1 (Yellow ■)" : "AIQ_1 (Orange ■)";
+                        lblAIQ1Name.Text = AIQ1_IsUp ? "AIQ_1 (Yellow â– )" : "AIQ_1 (Orange â– )";
                         lblAIQ1Name.Foreground = Brushes.Gray;
                     }
                 }
@@ -595,13 +595,13 @@ namespace NinjaTrader.NinjaScript.Strategies
                         double secondsSinceSignal = (DateTime.Now - lastSignalTime).TotalSeconds;
                         inCooldown = secondsSinceSignal < CooldownSeconds;
                         if (inCooldown)
-                            cooldownText = $"🕐 Cooldown ({secondsSinceSignal:F0}s/{CooldownSeconds}s)";
+                            cooldownText = $"ðŸ• Cooldown ({secondsSinceSignal:F0}s/{CooldownSeconds}s)";
                     }
                     else
                     {
                         inCooldown = CooldownBars > 0 && barsSinceLastSignal >= 0 && barsSinceLastSignal < CooldownBars;
                         if (inCooldown)
-                            cooldownText = $"🕐 Cooldown ({barsSinceLastSignal}/{CooldownBars})";
+                            cooldownText = $"ðŸ• Cooldown ({barsSinceLastSignal}/{CooldownBars})";
                     }
                     
                     if (inCooldown)
@@ -611,12 +611,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (barsSinceYellowSquare >= 0 && barsSinceYellowSquare <= MaxBarsAfterYellowSquare)
                     {
-                        lblWindowStatus.Text = $"⚡ LONG Window ({barsSinceYellowSquare}/{MaxBarsAfterYellowSquare})";
+                        lblWindowStatus.Text = $"âš¡ LONG Window ({barsSinceYellowSquare}/{MaxBarsAfterYellowSquare})";
                         lblWindowStatus.Foreground = Brushes.Lime;
                     }
                     else if (barsSinceOrangeSquare >= 0 && barsSinceOrangeSquare <= MaxBarsAfterYellowSquare)
                     {
-                        lblWindowStatus.Text = $"⚡ SHORT Window ({barsSinceOrangeSquare}/{MaxBarsAfterYellowSquare})";
+                        lblWindowStatus.Text = $"âš¡ SHORT Window ({barsSinceOrangeSquare}/{MaxBarsAfterYellowSquare})";
                         lblWindowStatus.Foreground = Brushes.Orange;
                     }
                     else
@@ -628,7 +628,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 
                 var (bull, bear, total) = GetConfluence();
                 string dailyPnLText = (EnableDailyLossLimit || EnableDailyProfitTarget) ? $" | Day: ${dailyPnL:F0}" : "";
-                string limitHitText = dailyLossLimitHit ? " 🛑STOPPED" : (dailyProfitTargetHit ? " 🎯TARGET" : "");
+                string limitHitText = dailyLossLimitHit ? " ðŸ›‘STOPPED" : (dailyProfitTargetHit ? " ðŸŽ¯TARGET" : "");
                 if (lblSessionStats != null) lblSessionStats.Text = $"Signals: {signalCount} | Bull:{bull} Bear:{bear}/{total}{dailyPnLText}{limitHitText}";
 
                 if (lblLastSignal != null && signalBorder != null)
@@ -646,7 +646,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (longWindowOpen && RR_IsUp && bull >= MinConfluenceRequired)
                     {
-                        lblLastSignal.Text = $"🔔 READY: LONG ({bull}/{total})";
+                        lblLastSignal.Text = $"ðŸ”” READY: LONG ({bull}/{total})";
                         lblLastSignal.FontWeight = FontWeights.Bold;
                         lblLastSignal.Foreground = Brushes.Lime;
                         signalBorder.BorderBrush = Brushes.Lime;
@@ -654,7 +654,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (shortWindowOpen && !RR_IsUp && bear >= MinConfluenceRequired)
                     {
-                        lblLastSignal.Text = $"🔔 READY: SHORT ({bear}/{total})";
+                        lblLastSignal.Text = $"ðŸ”” READY: SHORT ({bear}/{total})";
                         lblLastSignal.FontWeight = FontWeights.Bold;
                         lblLastSignal.Foreground = Brushes.Orange;
                         signalBorder.BorderBrush = Brushes.Orange;
@@ -680,7 +680,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (bull >= MinConfluenceRequired)
                     {
-                        lblLastSignal.Text = $"Bull OK ({bull}/{total})\nWaiting for Yellow ■...";
+                        lblLastSignal.Text = $"Bull OK ({bull}/{total})\nWaiting for Yellow â– ...";
                         lblLastSignal.FontWeight = FontWeights.Normal;
                         lblLastSignal.Foreground = Brushes.Lime;
                         signalBorder.BorderBrush = Brushes.Lime;
@@ -688,7 +688,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                     }
                     else if (bear >= MinConfluenceRequired)
                     {
-                        lblLastSignal.Text = $"Bear OK ({bear}/{total})\nWaiting for Orange ■...";
+                        lblLastSignal.Text = $"Bear OK ({bear}/{total})\nWaiting for Orange â– ...";
                         lblLastSignal.FontWeight = FontWeights.Normal;
                         lblLastSignal.Foreground = Brushes.Orange;
                         signalBorder.BorderBrush = Brushes.Orange;
