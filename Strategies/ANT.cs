@@ -436,32 +436,32 @@ namespace NinjaTrader.NinjaScript.Strategies
                 
                 // Signal filters
                 MinConfluenceRequired = 5;
-                MaxBarsAfterYellowSquare = 3;
+                MaxBarsAfterYellowSquare = 49;
                 MinSolarWaveCount = 1;
-                StopLossUSD = 300;
-                TakeProfitUSD = 600;
-                CooldownBars = 10;
-                EnableAutoTrading = false;
+                StopLossUSD = 600;
+                TakeProfitUSD = 1200;
+                CooldownBars = 3;
+                EnableAutoTrading = true;
                 MinConfluenceForAutoTrade = 5;
                 
                 // Trading hours filter
                 UseTradingHoursFilter = true;
-                Session1StartHour = 10;
+                Session1StartHour = 0;
                 Session1StartMinute = 0;
-                Session1EndHour = 10;
-                Session1EndMinute = 59;
-                Session2StartHour = 10;
+                Session1EndHour = 23;
+                Session1EndMinute = 58;
+                Session2StartHour = 0;
                 Session2StartMinute = 0;
-                Session2EndHour = 10;
-                Session2EndMinute = 59;
+                Session2EndHour = 23;
+                Session2EndMinute = 58;
                 
                 // Auto-close positions
                 CloseBeforeNews = true;
                 NewsCloseHour = 8;
                 NewsCloseMinute = 28;
                 CloseAtEndOfDay = true;
-                EODCloseHour = 15;
-                EODCloseMinute = 58;
+                EODCloseHour = 23;
+                EODCloseMinute = 0;
                 
                 // Indicator selection - all 8 enabled by default
                 UseRubyRiver = true;
@@ -525,9 +525,9 @@ namespace NinjaTrader.NinjaScript.Strategies
                 
                 // Risk Management
                 EnableDailyLossLimit = true;
-                DailyLossLimitUSD = 300;
+                DailyLossLimitUSD = 1200;
                 EnableDailyProfitTarget = true;
-                DailyProfitTargetUSD = 600;
+                DailyProfitTargetUSD = 2400;
                 ResetDailyPnLAtSessionStart = true;
                 StopLossBufferTicks = 2;
                 
@@ -543,11 +543,11 @@ namespace NinjaTrader.NinjaScript.Strategies
                 ATRTrailPeriod = 14;
                 ATRTrailDistanceMultiplier = 1.5;
                 ATRTrailActivationMultiplier = 2.0;
-                TrailActivationTicks = 80;
-                TrailDistanceTicks = 30;
+                TrailActivationTicks = 100;
+                TrailDistanceTicks = 40;
                 
                 // Debug
-                EnableIndicatorCSVLog = false;
+                EnableIndicatorCSVLog = true;
             }
             else if (State == State.DataLoaded)
             {
